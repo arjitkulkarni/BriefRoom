@@ -26,6 +26,7 @@ Only the server reads environment variables; the browser gets its public setting
 | `AI_PROVIDER` | – | `auto` (default: OpenAI first, Grok as fallback) · `openai` · `xai` · `rules` (no AI) |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | – | Enables OpenAI suggestions; default model `gpt-4o-mini` |
 | `XAI_API_KEY` / `XAI_MODEL` | – | Enables Grok (xAI) suggestions through its OpenAI-compatible API; default model `grok-4.20-non-reasoning` |
+| `DEMO_POOL_SIZE` | – | Ready-made live demos (`/demo`) kept waiting so the page opens instantly; another is seeded in the background after each one is taken. Default `2` in production, `1` in development, `0` in test. `0` seeds on demand |
 
 The Neon CLI also writes `NEON_BRANCH`, `NEON_BRANCH_ID` and `NEON_FUNCTION_HOST_SUFFIX`; BriefRoom ignores them. All secret-bearing files (`.env`, every `.env.*` except `.env.example`, and `.neon`) are gitignored.
 
