@@ -27,7 +27,8 @@ function toUi(m: ChatMessage): UiMessage {
   // SentStatus: SENDING 10, FAILED 20, SENT 30, RECEIVED 40, READ 50 (installed engine typings)
   const state: UiMessageState = m.sentStatus === 10 ? 'sending' : m.sentStatus === 20 ? 'failed' : m.sentStatus === 50 ? 'read' : 'sent';
   const base = { id: m.messageId || String(m.sentTime), senderUserId: m.senderUserId, sentTime: m.sentTime, state };
-  if (m.messageType === 'RC:TxtMsg') return { ...base, kind: 'text', text: String(c.text ?? '') };
+  // SDK sends carry `text`; Platform API sends (server-seeded demo lines) carry `content`.
+  if (m.messageType === 'RC:TxtMsg') return { ...base, kind: 'text', text: String(c.text ?? c.content ?? '') };
   if (m.messageType === 'RC:ImgMsg') return { ...base, kind: 'image', imageUrl: c.remoteUrl, thumbnail: c.thumbnailBase64 ? `data:image/jpeg;base64,${c.thumbnailBase64}` : undefined };
   if (isBrMessage(m.messageType)) {
     // Server-sent custom messages carry a JSON payload; tolerate both object and string content.
