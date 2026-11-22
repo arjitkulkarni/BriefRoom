@@ -16,6 +16,9 @@ import { domainEvents, nexconnChannels, participants, orders } from '../db/schem
 import type { NexconnServerApi } from './client.ts';
 
 const MAX_ATTEMPTS = 8;
+/** Events claimed per round, and at most this many from any one order (orders are delivered in parallel). */
+const BATCH = 50;
+const PER_ORDER = 5;
 const backoffSeconds = (attempt: number) => Math.min(300, 2 ** attempt);
 
 export function createChannelManager(db: Db, nexconn: NexconnServerApi, tokenCache: Map<string, string>) {
@@ -72,8 +75,17 @@ export function createOutbox(db: Db, nexconn: NexconnServerApi, channels: Return
               and ((p.nexconn_status = 'pending' and p.nexconn_next_attempt_at > now())
                 or (p.nexconn_status = 'sending' and p.nexconn_lease_until >= now()))
           )
+          -- fairness: only the first few undelivered events of each order, so one busy order cannot fill a batch
+          and e.id in (
+            select r.id from (
+              select d.id, row_number() over (partition by d.order_id order by d.seq) as rn
+              from domain_events d
+              where d.nexconn_status in ('pending', 'sending')
+            ) r
+            where r.rn <= ${PER_ORDER}
+          )
         order by e.seq
-        limit 25
+        limit ${BATCH}
         for update skip locked
       )
       returning id, seq, order_id, type, actor_role, payload, nexconn_attempts`);
@@ -85,9 +97,20 @@ export function createOutbox(db: Db, nexconn: NexconnServerApi, channels: Return
     if (!nexconn.enabled) return;
     stats.lastRunAt = Date.now();
     const batch = await claim();
-    const blockedOrders = new Set<string>();
-    for (const ev of batch) {
-      if (blockedOrders.has(ev.order_id)) {
+    // Orders are delivered in parallel, each one strictly in sequence, so a busy order (a freshly
+    // seeded demo, a long chat) never holds back live updates for everyone else.
+    const byOrder = new Map<string, typeof batch>();
+    for (const ev of batch) byOrder.set(ev.order_id, [...(byOrder.get(ev.order_id) ?? []), ev]);
+    await Promise.all([...byOrder.values()].map((events) => deliver(events)));
+    // Keep going while there was work: the per-order cap can leave more behind a short batch.
+    // (Failures go into backoff and are not claimable, so this ends.)
+    if (batch.length) again = true;
+  }
+
+  async function deliver(events: Awaited<ReturnType<typeof claim>>) {
+    let blocked = false;
+    for (const ev of events) {
+      if (blocked) {
         await db.update(domainEvents).set({ nexconnStatus: 'pending', nexconnLeaseUntil: null }).where(eq(domainEvents.id, ev.id));
         continue;
       }
@@ -110,7 +133,7 @@ export function createOutbox(db: Db, nexconn: NexconnServerApi, channels: Return
         const msg = (e as Error).message.slice(0, 500);
         stats.failed++;
         stats.lastError = msg;
-        blockedOrders.add(ev.order_id);
+        blocked = true; // hold back this order's later events; other orders carry on
         await db
           .update(domainEvents)
           .set({
@@ -123,7 +146,6 @@ export function createOutbox(db: Db, nexconn: NexconnServerApi, channels: Return
           .where(eq(domainEvents.id, ev.id));
       }
     }
-    if (batch.length === 25) again = true;
   }
 
   async function run() {
