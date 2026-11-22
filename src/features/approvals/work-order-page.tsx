@@ -8,7 +8,7 @@ import { Logo, ThemeToggle } from '@/components/layout/brand';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/primitives';
 import { api } from '@/lib/api';
-import { customerKey, sellerKey } from '@/lib/keys';
+import { consumeUrlKey, customerKey, sellerKey, setTabKey, tabKey } from '@/lib/keys';
 import { dateTime } from '@/lib/utils';
 import { MarkerBadge, TONE_CLASSES, toneOf } from '../annotations/annotation-meta';
 import { VerifyFingerprint } from './approval-panel';
@@ -21,7 +21,10 @@ export default function WorkOrderPage() {
 
   useEffect(() => {
     (async () => {
-      let key = customerKey(orderId);
+      // Same order as the workspace: URL key → this tab's (or frame's) key → device keys.
+      const fromUrl = consumeUrlKey();
+      if (fromUrl) setTabKey(orderId, fromUrl);
+      let key = fromUrl ?? tabKey(orderId) ?? customerKey(orderId);
       if (!key) key = sellerKey((await api.meta(orderId)).shopId);
       if (!key) throw new Error('Open the work order from the order workspace on your device.');
       setOrder((await api.order(orderId, key)).order);
