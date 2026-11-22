@@ -81,9 +81,9 @@ export function HeroCopy() {
         </motion.div>
         <motion.div {...rise(reduce, 0.9)}>
           <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-            <a href="#how">
-              <Play className="fill-current" /> See how it works
-            </a>
+            <Link to="/demo">
+              <Play className="fill-current" /> Try the live demo
+            </Link>
           </Button>
         </motion.div>
       </div>
