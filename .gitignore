@@ -1,6 +1,21 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
 data/
 *.log
 .DS_Store
+.neon
+
+# OS / editor / tooling
+Thumbs.db
+desktop.ini
+*.tsbuildinfo
+coverage/
+
+# test artefacts
+playwright-report/
+test-results/
+
+*_Master_Prompt.md
