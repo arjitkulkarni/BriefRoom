@@ -38,6 +38,7 @@ const ctx = createContext(config, dbh);
 const app = createApp(ctx);
 ctx.outbox.start();
 ctx.outbox.kick(); // deliver anything left pending by a previous run
+ctx.demo.start(); // pre-seed live demos so "Try the live demo" opens instantly
 
 const server = app.listen(config.port, () => {
   console.log(`\nBriefRoom API listening on http://localhost:${config.port}`);
@@ -48,6 +49,7 @@ const server = app.listen(config.port, () => {
 async function shutdown(signal: string) {
   console.log(`[${signal}] shutting down…`);
   ctx.outbox.stop();
+  ctx.demo.stop();
   server.close();
   await dbh.close().catch(() => undefined);
   process.exit(0);
