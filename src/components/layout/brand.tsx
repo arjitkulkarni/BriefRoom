@@ -3,7 +3,6 @@ import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme, type ThemePreference } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '../ui/overlay';
 
 /**
  * BriefRoom mark (official artwork: public/brand/*.svg). Light theme: cream tile, ink line; dark theme: ink tile,
@@ -53,30 +52,27 @@ const OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: 'system', label: 'System', icon: Monitor },
 ];
 
-/** Accessible theme selector (menu with radio items). */
+/**
+ * One-click light/dark toggle. Flips whatever is currently on screen (including a System-resolved theme) and
+ * stores the result as an explicit choice. System is still selectable from ThemeSegmented.
+ */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { preference, resolved, setPreference } = useTheme();
-  const Icon = preference === 'system' ? Monitor : resolved === 'dark' ? Moon : Sun;
+  const { resolved, setPreference } = useTheme();
+  const dark = resolved === 'dark';
+  const icon = 'absolute inset-0 m-auto size-[18px] transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none';
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn('grid size-10 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)}
-        aria-label={`Theme: ${preference}${preference === 'system' ? ` (${resolved})` : ''}. Change theme`}
-      >
-        <Icon className="size-[18px]" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-40">
-        <DropdownMenuLabel>Theme</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={preference} onValueChange={(v) => setPreference(v as ThemePreference)}>
-          {OPTIONS.map((o) => (
-            <DropdownMenuRadioItem key={o.value} value={o.value}>
-              <o.icon className="text-muted-foreground" />
-              {o.label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={dark}
+      aria-label="Dark theme"
+      title={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+      onClick={() => setPreference(dark ? 'light' : 'dark')}
+      className={cn('relative grid size-10 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)}
+    >
+      <Sun aria-hidden className={cn(icon, dark ? 'rotate-90 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100')} />
+      <Moon aria-hidden className={cn(icon, dark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0')} />
+    </button>
   );
 }
 
