@@ -17,6 +17,7 @@ const Workspace = lazy(() => import('./features/workspace/workspace-page'));
 const WorkOrder = lazy(() => import('./features/approvals/work-order-page'));
 const DesignSystem = lazy(() => import('./pages/design-system-page'));
 const Stats = lazy(() => import('./pages/stats-page'));
+const Demo = lazy(() => import('./features/demo/demo-page'));
 const NotFound = lazy(() => import('./pages/not-found-page'));
 // Isolated motion-design preview (not linked from the product).
 const MotionLab = lazy(() => import('./features/motion-lab/motion-lab-page'));
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/o/:orderId/work-order" element={<WorkOrder />} />
               <Route path="/design-system" element={<DesignSystem />} />
               <Route path="/stats" element={<Stats />} />
+              <Route path="/demo" element={<Demo />} />
               <Route path="/motion-lab" element={<MotionLab />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
