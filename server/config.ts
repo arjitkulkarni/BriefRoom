@@ -89,7 +89,9 @@ export function loadConfig(): { config: AppConfig; errors: string[]; warnings: s
   // ---------------------------------------------------------------- public URL
   // On Render, RENDER_EXTERNAL_URL (the service's onrender.com URL) is set automatically; PUBLIC_URL
   // overrides it, e.g. for a custom domain.
-  let publicUrl = (v('PUBLIC_URL') || v('RENDER_EXTERNAL_URL')).replace(/\/+$/, '');
+  // On Vercel, VERCEL_PROJECT_PRODUCTION_URL is the production domain (host only, no scheme).
+  const vercelUrl = v('VERCEL_PROJECT_PRODUCTION_URL') ? `https://${v('VERCEL_PROJECT_PRODUCTION_URL')}` : '';
+  let publicUrl = (v('PUBLIC_URL') || v('RENDER_EXTERNAL_URL') || vercelUrl).replace(/\/+$/, '');
   if (publicUrl && !/^https?:\/\//.test(publicUrl)) errors.push(`PUBLIC_URL must start with http:// or https:// (got "${publicUrl}").`);
   if (prod) {
     if (!publicUrl) errors.push('PUBLIC_URL is required in production (e.g. https://briefroom.example.com). Share links and image URLs are built from it.');
