@@ -52,7 +52,7 @@ async function timedPing(db: Db) {
 export async function connectPostgres(url: string, migrationUrl: string | null): Promise<DbHandle> {
   const pg = (await import('pg')).default;
   const { drizzle } = await import('drizzle-orm/node-postgres');
-  const pool = new pg.Pool({ connectionString: url, max: 10, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 15_000 });
+  const pool = new pg.Pool({ connectionString: url, max: process.env.VERCEL ? 3 : 10, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 15_000 });
   pool.on('error', (err) => console.error('[db] idle client error', err.message));
   const db = drizzle(pool, { schema }) as unknown as Db;
   return {
