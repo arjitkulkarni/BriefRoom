@@ -138,7 +138,7 @@ test.describe('live Nexconn', () => {
       expect(r.status, JSON.stringify(r.body)).toBe(200);
     }
     // Seller's workspace refreshes from the BR events (no reload): radar lists them…
-    await seller.getByRole('tab', { name: /Radar/ }).click();
+    await seller.getByRole('tab', { name: /To-do/ }).click();
     for (const t of titles) await expect(seller.getByText(t).filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
     await seller.getByRole('tab', { name: /Chat/ }).click();
     // …and the chat shows one activity card per event, in the order they happened.
