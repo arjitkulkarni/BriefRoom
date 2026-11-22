@@ -35,7 +35,7 @@ test('theme: explicit choice persists and is applied before first paint; System 
   // Reload and read the attribute at DOMContentLoaded — set by the inline script, before React runs.
   await page.reload({ waitUntil: 'domcontentloaded' });
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(15, 15, 17)');
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(11, 10, 9)');
 
   // System: no stored choice → follows prefers-color-scheme.
   const ctx = await browser.newContext({ colorScheme: 'dark' });

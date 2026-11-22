@@ -49,7 +49,7 @@ export default function WorkOrderPage() {
   const refUrl = (id: string) => order.references.find((r) => r.id === id)?.url;
 
   return (
-    <div className="min-h-dvh bg-background print:bg-white">
+    <div className="app-shell min-h-dvh print:bg-white print:bg-none">
       <div className="no-print sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-surface/95 px-4 py-2 backdrop-blur">
         <Button asChild variant="ghost" size="sm">
           <Link to={`/o/${order.id}`}>
@@ -63,7 +63,7 @@ export default function WorkOrderPage() {
         </Button>
       </div>
 
-      <article className="mx-auto my-6 max-w-[210mm] rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-10 print:my-0 print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none">
+      <article className="mx-auto my-6 max-w-[210mm] rounded-xl glass-panel p-6 shadow-sm sm:p-10 print:my-0 print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none">
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-divider pb-5">
           <div>
             <Logo />

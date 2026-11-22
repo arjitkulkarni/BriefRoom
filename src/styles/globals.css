@@ -19,9 +19,9 @@
   --surface-tertiary: #e9e6df;
   --surface-elevated: #ffffff;
 
-  --primary: #17161a;
-  --primary-foreground: #ffffff;
-  --primary-hover: #2e2c31;
+  --primary: #f6c343;
+  --primary-foreground: #17161a;
+  --primary-hover: #eeb52a;
   --primary-soft: #fcf1c7;
   --primary-text: #17161a;
   --secondary: #eceae4;
@@ -96,35 +96,45 @@
   --elev-md: 0 6px 16px -4px rgb(var(--shadow-color) / 0.12);
   --elev-lg: 0 14px 36px -10px rgb(var(--shadow-color) / 0.2);
   --elev-xl: 0 28px 64px -16px rgb(var(--shadow-color) / 0.3);
+
+  /* 2.1 visual refresh — warm light, glass panels */
+  --glow: rgb(246 195 67 / 0.2);
+  --glow-soft: rgb(246 195 67 / 0.1);
+  --glass: rgb(255 255 255 / 0.82);
+  --glass-border: rgb(23 22 26 / 0.09);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --primary-glow: 0 10px 28px -10px rgb(214 160 20 / 0.55);
+  /* Yellow on paper is 1.5:1, so primary controls get a dark-gold edge (4.2:1, WCAG 1.4.11). */
+  --primary-edge: #9a6d06;
 }
 
 /* ------------------------------------------------------------------ Dark (designed, not inverted) */
 [data-theme='dark'] {
   color-scheme: dark;
-  --background: #0f0f11;
-  --foreground: #f3f2ee;
-  --surface: #16161a;
-  --surface-secondary: #1c1c21;
-  --surface-tertiary: #25252b;
-  --surface-elevated: #1e1e23;
+  --background: #0b0a09;
+  --foreground: #f5f2ea;
+  --surface: #151412;
+  --surface-secondary: #1b1a17;
+  --surface-tertiary: #24221e;
+  --surface-elevated: #1d1b18;
 
-  --primary: #f3f2ee;
-  --primary-foreground: #121214;
-  --primary-hover: #dad8d1;
-  --primary-soft: #2a2517;
-  --primary-text: #f3f2ee;
-  --secondary: #25252b;
-  --secondary-foreground: #f3f2ee;
-  --secondary-hover: #2e2e35;
+  --primary: #f6c343;
+  --primary-foreground: #14110a;
+  --primary-hover: #f9d061;
+  --primary-soft: #2b2312;
+  --primary-text: #f6c343;
+  --secondary: #24221e;
+  --secondary-foreground: #f5f2ea;
+  --secondary-hover: #2d2a25;
   --accent: #f6c343;
-  --accent-foreground: #121214;
+  --accent-foreground: #14110a;
 
-  --muted: #202025;
-  --muted-foreground: #a6a49e;
-  --border: #2b2b31;
-  --border-strong: #6d6b73;
-  --divider: #232328;
-  --input: #6d6b73;
+  --muted: #1d1b18;
+  --muted-foreground: #aaa59a;
+  --border: #2a2722;
+  --border-strong: #6e6a62;
+  --divider: #221f1c;
+  --input: #6e6a62;
   --ring: #f6c343;
   --placeholder: #8c8a92;
 
@@ -157,17 +167,17 @@
   --ann-add-text: #f5ae5c;
 
   --overlay: rgb(0 0 0 / 0.62);
-  --tooltip: #f3f2ee;
-  --tooltip-foreground: #121214;
-  --skeleton: #25252b;
-  --canvas: #0a0a0c;
-  --canvas-dot: #1f1f25;
+  --tooltip: #f5f2ea;
+  --tooltip-foreground: #14110a;
+  --skeleton: #24221e;
+  --canvas: #090807;
+  --canvas-dot: #1f1d19;
   --canvas-dim: rgb(0 0 0 / 0.4);
-  --bubble-own: #29251a;
-  --bubble-own-border: #4a3f1f;
-  --bubble-other: #1c1c21;
-  --bubble-other-border: #2b2b31;
-  --activity: #1a1a1f;
+  --bubble-own: #2a2416;
+  --bubble-own-border: #4d401d;
+  --bubble-other: #1b1a17;
+  --bubble-other-border: #2a2722;
+  --activity: #191815;
 
   --shadow-color: 0 0 0;
   --elev-xs: 0 1px 2px rgb(0 0 0 / 0.5);
@@ -175,6 +185,14 @@
   --elev-md: 0 8px 20px -6px rgb(0 0 0 / 0.6);
   --elev-lg: 0 16px 40px -10px rgb(0 0 0 / 0.7);
   --elev-xl: 0 30px 70px -16px rgb(0 0 0 / 0.8);
+
+  --glow: rgb(246 195 67 / 0.14);
+  --glow-soft: rgb(246 195 67 / 0.06);
+  --glass: rgb(24 22 19 / 0.78);
+  --glass-border: rgb(255 244 214 / 0.09);
+  --glass-highlight: rgb(255 244 214 / 0.06);
+  --primary-glow: 0 10px 30px -10px rgb(246 195 67 / 0.5);
+  --primary-edge: #f6c343;
 }
 
 /* ------------------------------------------------------------------ Tailwind mapping */
@@ -258,10 +276,11 @@
   --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
 
   --shadow-xs: var(--elev-xs);
   --shadow-sm: var(--elev-sm);
@@ -310,6 +329,21 @@
 }
 
 /* Dotted work surface behind the reference image: keeps the image from blending into panels. */
+/* Page shell: the background plus warm golden light from the top (2.1 refresh). */
+.app-shell {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(70rem 34rem at 78% -14rem, var(--glow), transparent 70%),
+    radial-gradient(46rem 28rem at -8% -8rem, var(--glow-soft), transparent 70%);
+  background-repeat: no-repeat;
+}
+/* Glass panel: translucent surface, hairline border, inner top highlight. */
+.glass-panel {
+  background-color: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-md);
+}
+
 .canvas-surface {
   background-color: var(--canvas);
   background-image: radial-gradient(var(--canvas-dot) 1px, transparent 1px);
@@ -338,6 +372,12 @@
   [data-theme='dark'] {
     /* Paper is always light, whatever the screen theme. */
     --background: #ffffff;
+    --glow: transparent;
+    --glow-soft: transparent;
+    --glass: #ffffff;
+    --glass-border: #d9d9d4;
+    --glass-highlight: transparent;
+    --primary-glow: none;
     --foreground: #111111;
     --surface: #ffffff;
     --surface-secondary: #f4f4f2;

@@ -107,7 +107,7 @@ export function CompareView({ order, initialBaseId, initialTargetId }: { order: 
             ))}
           </NativeSelect>
         </label>
-        <div className="ml-auto inline-flex rounded-lg border border-border bg-surface-secondary p-1" role="radiogroup" aria-label="Comparison layout">
+        <div className="ml-auto inline-flex rounded-lg glass-panel-secondary p-1" role="radiogroup" aria-label="Comparison layout">
           {(
             [
               ['slider', SplitSquareHorizontal, 'Slider'],

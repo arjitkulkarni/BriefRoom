@@ -1,5 +1,7 @@
 import { AlertTriangle, Bot, CheckCircle2, ChevronDown, CircleHelp, ClipboardList, Cpu, Loader2, MapPin, MessageSquare, Plus, RotateCcw, ShieldAlert, Sparkles, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useState } from 'react';
+import { EASE } from '@/components/motion/kit';
 import { AI_PROVIDER_LABEL, otherRole, roleLabel, type AnalysisOutcome, type Blocker, type ClarificationView, type OrderView, type Role, type SuggestionView } from '@shared/types';
 import { EmptyState } from '@/components/feedback/states';
 import { Button } from '@/components/ui/button';
@@ -36,7 +38,7 @@ function ClarificationCard({ c, order, role, locked, busy, actions }: { c: Clari
   const ann = c.annotationId ? order.annotations.find((a) => a.id === c.annotationId) : null;
   const Src = SOURCE[c.source];
   return (
-    <article className={cn('rounded-lg border bg-surface', c.critical && c.status !== 'resolved' ? 'border-warning/50' : 'border-border')}>
+    <motion.article layout layoutId={`clar-${c.id}`} transition={{ layout: { duration: 0.45, ease: EASE.glide } }} className={cn('rounded-xl border bg-surface', c.critical && c.status !== 'resolved' ? 'border-warning/50 shadow-[0_0_0_3px_rgb(180_83_9/0.08)]' : 'border-border')}>
       <button type="button" className="flex w-full items-start gap-3 p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span className={cn('mt-0.5 grid size-7 shrink-0 place-items-center rounded-full', c.status === 'resolved' ? 'bg-success-bg text-success-text' : c.critical ? 'bg-warning-bg text-warning-text' : 'bg-info-bg text-info-text')}>
           {c.status === 'resolved' ? <CheckCircle2 className="size-4" aria-hidden /> : c.critical ? <ShieldAlert className="size-4" aria-hidden /> : <CircleHelp className="size-4" aria-hidden />}
@@ -133,7 +135,7 @@ function ClarificationCard({ c, order, role, locked, busy, actions }: { c: Clari
           )}
         </div>
       )}
-    </article>
+    </motion.article>
   );
 }
 
@@ -254,7 +256,7 @@ export function RadarPanel({ order, role, locked, busy, actions, onBlocker }: { 
           )}
         </div>
         {missing.map((b) => (
-          <button key={b.id} onClick={() => onBlocker(b)} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left text-sm hover:bg-surface-secondary">
+          <button key={b.id} onClick={() => onBlocker(b)} className="flex items-center gap-3 rounded-lg glass-panel p-3 text-left text-sm hover:bg-surface-secondary">
             <span className="grid size-7 place-items-center rounded-full bg-warning-bg text-warning-text">
               <ClipboardList className="size-4" aria-hidden />
             </span>
@@ -263,7 +265,7 @@ export function RadarPanel({ order, role, locked, busy, actions, onBlocker }: { 
           </button>
         ))}
         {openQuestions.map((a) => (
-          <button key={a.id} onClick={() => actions.focusAnnotation(a.id)} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left text-sm hover:bg-surface-secondary">
+          <button key={a.id} onClick={() => actions.focusAnnotation(a.id)} className="flex items-center gap-3 rounded-lg glass-panel p-3 text-left text-sm hover:bg-surface-secondary">
             <MarkerBadge number={a.number} kind={a.kind} />
             <span className="flex-1 text-foreground">{a.note}</span>
             <Badge tone="info">
@@ -288,7 +290,7 @@ export function RadarPanel({ order, role, locked, busy, actions, onBlocker }: { 
         </section>
       )}
 
-      <section aria-labelledby="sug-h" className="grid gap-2 rounded-xl border border-border bg-surface-secondary/60 p-3">
+      <section aria-labelledby="sug-h" className="grid gap-2 rounded-xl glass-panel-secondary/60 p-3">
         <div className="flex items-center justify-between gap-2">
           <h3 id="sug-h" className="flex items-center gap-1.5 text-sm font-bold text-foreground">
             <Sparkles className="size-4 text-primary-text" aria-hidden /> Ambiguity check

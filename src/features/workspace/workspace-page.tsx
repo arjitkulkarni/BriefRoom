@@ -384,7 +384,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:p-4">
       <div className="flex flex-wrap items-center gap-2">
         {!locked && liveRefs.length > 0 && (
-          <div className="inline-flex rounded-lg border border-border bg-surface p-1 shadow-xs" role="radiogroup" aria-label="Canvas tool">
+          <div className="inline-flex rounded-lg glass-panel p-1 shadow-xs" role="radiogroup" aria-label="Canvas tool">
             {(
               [
                 ['select', MousePointer2, 'Select', 'V'],
@@ -402,7 +402,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
           </div>
         )}
         {ordered.length > 0 && (
-          <div className="ml-auto inline-flex items-center gap-1 rounded-lg border border-border bg-surface p-1 shadow-xs">
+          <div className="ml-auto inline-flex items-center gap-1 rounded-lg glass-panel p-1 shadow-xs">
             <Button variant="ghost" size="icon-sm" onClick={() => goTo(-1)} aria-label="Previous annotation">
               <ChevronLeft />
             </Button>
@@ -440,7 +440,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
         )}
         <AnimatePresence>
           {pending && ref && isMd && (
-            <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="absolute inset-x-3 bottom-3 z-40 mx-auto max-w-md rounded-xl border border-border bg-surface-elevated p-4 shadow-xl">
+            <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="absolute inset-x-3 bottom-3 z-40 mx-auto max-w-md rounded-xl glass-panel-elevated p-4 shadow-xl">
               <AnnotationComposer region={pending} imageUrl={ref.url} busy={busy === 'annotate'} onSave={saveAnnotation} onCancel={() => setPending(null)} />
             </motion.div>
           )}
@@ -565,7 +565,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
       { id: 'versions', label: 'Versions', icon: FileText, badge: awaitingMe ? 1 : 0 },
     ];
     return (
-      <div className="flex h-dvh flex-col bg-background">
+      <div className="app-shell flex h-dvh flex-col">
         {header}
         <div className="flex items-center gap-2 overflow-x-auto border-b border-divider bg-surface px-3 py-1.5">
           <StatusBadge status={order.status} />
@@ -624,7 +624,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-background">
+    <div className="app-shell flex h-dvh flex-col">
       {header}
       <div className={cn('grid min-h-0 flex-1', isXl ? 'grid-cols-[300px_minmax(0,1fr)_400px]' : 'grid-cols-[minmax(0,1fr)_minmax(320px,380px)]')}>
         {isXl && (

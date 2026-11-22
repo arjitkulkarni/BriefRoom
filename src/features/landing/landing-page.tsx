@@ -1,5 +1,7 @@
-import { ArrowRight, Armchair, BadgeCheck, Bot, CakeSlice, CheckCircle2, ClipboardCheck, Cpu, FileCheck2, Fingerprint, Gem, Handshake, Layers, Link2, MessageSquareText, MousePointerClick, Radar, Shirt, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Armchair, BadgeCheck, Bot, CakeSlice, CheckCircle2, ClipboardCheck, Cpu, FileCheck2, Fingerprint, Gem, Handshake, Layers, Link2, MessageSquareText, MousePointerClick, Radar, Shirt, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useState } from 'react';
+import { EASE } from '@/components/motion/kit';
 import { Link } from 'react-router-dom';
 import { TEMPLATES } from '@shared/templates';
 import { Logo, ThemeToggle } from '@/components/layout/brand';
@@ -9,20 +11,35 @@ import { lastShop } from '@/lib/keys';
 import { cn } from '@/lib/utils';
 import { KindChip, MarkerBadge } from '../annotations/annotation-meta';
 import { DEMO_ANNOTATIONS, DEMO_DIFF, DEMO_HASH, DEMO_IMAGE, DEMO_IMAGE_SIZE } from './demo-data';
-import { DemoMarkers, HeroPreview } from './hero-preview';
+import { DemoMarkers } from './hero-preview';
+import { HeroCopy, HeroScene } from './hero-spatial';
 
 /** Highlighter stroke behind text; wraps across lines (box-decoration-clone), never forces overflow. */
 function Highlight({ children }: { children: React.ReactNode }) {
   return <span className="box-decoration-clone rounded-[3px] bg-[linear-gradient(transparent_46%,var(--accent)_46%,var(--accent)_90%,transparent_90%)] px-1 [-webkit-box-decoration-break:clone]">{children}</span>;
 }
 
+/** Scroll reveal: the section header, then its content, rise into place once (opacity + 24 px). */
+const reveal = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '0px 0px -12% 0px' },
+  transition: { duration: 0.75, delay, ease: EASE.settle },
+});
+
 function Section({ id, eyebrow, title, intro, children, className }: { id?: string; eyebrow: string; title: React.ReactNode; intro?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section id={id} className={cn('mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 md:py-24', className)}>
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{eyebrow}</p>
-      <h2 className="mt-3 max-w-3xl font-display text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-4xl">{title}</h2>
-      {intro && <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{intro}</p>}
-      <div className="mt-10">{children}</div>
+    <section id={id} className={cn('mx-auto w-full max-w-7xl scroll-mt-20 px-4 py-16 sm:px-6 md:py-24', className)}>
+      <motion.div {...reveal()}>
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="h-px w-6 bg-accent" aria-hidden /> {eyebrow}
+        </p>
+        <h2 className="mt-3 max-w-3xl font-display text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-[2.6rem] sm:leading-[1.1]">{title}</h2>
+        {intro && <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{intro}</p>}
+      </motion.div>
+      <motion.div className="mt-10" {...reveal(0.12)}>
+        {children}
+      </motion.div>
     </section>
   );
 }
@@ -39,7 +56,7 @@ function ChatProblem() {
   ];
   return (
     <div className="grid items-center gap-8 lg:grid-cols-2">
-      <div className="relative rounded-xl border border-border bg-surface p-4 shadow-sm" aria-label="Illustration of a typical chat thread">
+      <div className="relative rounded-xl glass-panel p-4 shadow-sm" aria-label="Illustration of a typical chat thread">
         <p className="mb-3 text-xs font-semibold text-muted-foreground">Illustration · a typical custom-order thread</p>
         <ol className="grid gap-2">
           {lines.map((l, i) => (
@@ -56,7 +73,7 @@ function ChatProblem() {
           ['Size, price and date get agreed somewhere in message 27.', 'Every detail lives in one structured specification with an owner and a history.'],
           ['Nobody can prove what was finally confirmed.', 'Both people approve the same frozen version with a fingerprint, and it becomes the work order.'],
         ].map(([p, s]) => (
-          <li key={p} className="rounded-lg border border-border bg-surface p-4">
+          <li key={p} className="rounded-lg glass-panel p-4">
             <p className="font-semibold text-foreground">{p}</p>
             <p className="mt-1 text-sm text-muted-foreground">{s}</p>
           </li>
@@ -70,7 +87,7 @@ function SpatialDemo() {
   const [selected, setSelected] = useState('a1');
   const a = DEMO_ANNOTATIONS.find((x) => x.id === selected)!;
   return (
-    <div className="grid gap-6 rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,340px)_1fr]">
+    <div className="grid gap-6 rounded-2xl glass-panel p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,340px)_1fr]">
       <div className="canvas-surface rounded-xl p-4">
         <div className="relative mx-auto max-w-[300px] overflow-hidden rounded-md shadow-lg" style={{ aspectRatio: `${DEMO_IMAGE_SIZE.width} / ${DEMO_IMAGE_SIZE.height}` }}>
           <img src={DEMO_IMAGE} alt="Reference photo with four numbered annotations" className="absolute inset-0 size-full object-cover" loading="lazy" />
@@ -123,7 +140,7 @@ function SpatialDemo() {
 function RadarDemo() {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="grid gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div className="grid gap-3 rounded-2xl glass-panel p-5 shadow-sm">
         <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning-bg px-3 py-2 text-sm font-semibold text-warning-text">
           <ShieldAlert className="size-4" aria-hidden /> 2 items block the next version
         </div>
@@ -178,7 +195,7 @@ function VersionDemo() {
   const v1 = DEMO_ANNOTATIONS.slice(0, 2);
   const v2 = DEMO_ANNOTATIONS;
   return (
-    <div className="grid gap-6 rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,340px)_1fr]">
+    <div className="grid gap-6 rounded-2xl glass-panel p-4 shadow-sm sm:p-6 lg:grid-cols-[minmax(0,340px)_1fr]">
       <div className="grid gap-2">
         <div className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-md shadow-lg" style={{ aspectRatio: `${DEMO_IMAGE_SIZE.width} / ${DEMO_IMAGE_SIZE.height}` }}>
           <img src={DEMO_IMAGE} alt="Version 2 with all annotations" className="absolute inset-0 size-full object-cover" loading="lazy" />
@@ -275,20 +292,21 @@ function ApprovalDemo() {
 export default function LandingPage() {
   const shop = lastShop();
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="app-shell min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:shadow-lg">
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
-        <nav className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4 sm:px-6" aria-label="Main">
-          <Logo />
-          <div className="ml-8 hidden items-center gap-1 md:flex">
+      <header className="sticky top-0 z-40 border-b border-[var(--glass-border)] bg-background/70 backdrop-blur-xl">
+        <nav className="mx-auto flex h-16 w-full max-w-7xl items-center gap-2 px-4 sm:px-6" aria-label="Main">
+          <Logo className="text-[21px]" />
+          <div className="ml-10 hidden items-center gap-1 md:flex">
             {[
               ['#how', 'How it works'],
               ['#features', 'Product'],
               ['#use-cases', 'Use cases'],
+              ['https://github.com/arjitkulkarni/BriefRoom#readme', 'Docs'],
             ].map(([href, label]) => (
-              <a key={href} href={href} className="rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <a key={href} href={href} {...(href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})} className="rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 {label}
               </a>
             ))}
@@ -312,37 +330,23 @@ export default function LandingPage() {
       </header>
 
       <main id="main">
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.02fr_1fr] lg:pb-24">
+        <section className="relative mx-auto grid w-full max-w-7xl items-center gap-10 overflow-x-clip px-4 pb-16 pt-10 sm:px-6 md:pt-16 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-6 lg:pb-24">
+          <HeroCopy />
           <div className="min-w-0">
-            <Badge tone="outline" className="whitespace-normal bg-surface">
-              <Sparkles aria-hidden /> For cakes, merch, furniture &amp; jewellery made to order
-            </Badge>
-            <h1 className="mt-6 font-display text-[clamp(2.6rem,6vw,4.6rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-foreground">
-              Custom orders, <Highlight>without the guesswork.</Highlight>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">One shared space for every reference, revision and final yes.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link to="/start">
-                  Create your first brief <ArrowRight />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <a href="#how">See how it works</a>
-              </Button>
-            </div>
-            <ul className="mt-8 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-              {['No app for customers — a private link', 'Real-time conversation per order', 'Both approve the same frozen version', 'Printable work order with a fingerprint'].map((t) => (
-                <li key={t} className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-success-text" aria-hidden /> {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="min-w-0">
-            <HeroPreview />
+            <HeroScene />
           </div>
         </section>
+
+        <div className="border-y border-[var(--glass-border)] bg-surface/40">
+          <motion.p className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 py-6 text-[13px] font-semibold tracking-[0.32em] text-muted-foreground sm:text-sm" {...reveal()}>
+            {['DISCUSS', 'CLARIFY', 'VERSION', 'APPROVE'].map((w, i) => (
+              <span key={w} className="flex items-center gap-5">
+                {i > 0 && <span className="text-accent" aria-hidden>·</span>}
+                {w}
+              </span>
+            ))}
+          </motion.p>
+        </div>
 
         <div className="border-y border-border bg-surface">
           <Section eyebrow="The problem" title="Custom orders get lost in chat." intro="Chat is great for talking and terrible for agreeing. Screenshots, voice notes and “like this but…” pile up until nobody can say what was finally decided.">
@@ -360,7 +364,7 @@ export default function LandingPage() {
             ].map(([Icon, t, d], i) => {
               const I = Icon as typeof Link2;
               return (
-                <li key={t as string} className="relative rounded-xl border border-border bg-surface p-5 shadow-xs">
+                <li key={t as string} className="relative rounded-xl glass-panel p-5 shadow-xs">
                   <span className="font-mono text-xs font-medium text-muted-foreground">0{i + 1}</span>
                   <I className="mt-3 size-6 text-foreground" aria-hidden />
                   <h3 className="mt-3 font-bold text-foreground">{t as string}</h3>
@@ -423,7 +427,7 @@ export default function LandingPage() {
                 [Gem, TEMPLATES.jewellery],
               ] as const
             ).map(([Icon, t]) => (
-              <div key={t.id} className="rounded-xl border border-border bg-surface p-5 shadow-xs">
+              <div key={t.id} className="rounded-xl glass-panel p-5 shadow-xs">
                 <Icon className="size-6 text-foreground" aria-hidden />
                 <h3 className="mt-3 font-bold text-foreground">{t.name}</h3>
                 <ul className="mt-3 flex flex-wrap gap-1.5">

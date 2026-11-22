@@ -1,29 +1,48 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
+import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme, type ThemePreference } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '../ui/overlay';
 
-/** BriefRoom mark: a reference frame with a numbered annotation marker on its corner. */
+/**
+ * BriefRoom mark (official artwork: public/brand/*.svg). Light theme: cream tile, ink line; dark theme: ink tile,
+ * cream line; the annotation ring is gold in both. Brand colours are fixed artwork, not UI tokens.
+ */
 export function LogoMark({ className }: { className?: string }) {
+  const id = useId().replace(/:/g, '');
   return (
-    <svg viewBox="0 0 32 32" className={cn('size-8', className)} aria-hidden>
-      <rect x="1" y="1" width="30" height="30" rx="8" className="fill-primary" />
-      <rect x="7.5" y="9.5" width="14" height="14" rx="3" fill="none" className="stroke-primary-foreground" strokeWidth="2.2" />
-      <path d="M11 19.5l3-3.4 2.4 2.4 2-2.2" fill="none" className="stroke-primary-foreground" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity=".85" />
-      <circle cx="22.5" cy="9.5" r="5" className="fill-accent stroke-primary" strokeWidth="2" />
-      <text x="22.5" y="12" textAnchor="middle" fontSize="7" fontWeight="800" className="fill-accent-foreground" fontFamily="Manrope, system-ui, sans-serif">
-        1
-      </text>
+    <svg viewBox="0 0 256 256" className={cn('size-8', className)} aria-hidden>
+      <defs>
+        <linearGradient id={`gold-l-${id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F5C94C" />
+          <stop offset="1" stopColor="#D99A00" />
+        </linearGradient>
+        <linearGradient id={`gold-d-${id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFE58A" />
+          <stop offset="1" stopColor="#FFC928" />
+        </linearGradient>
+      </defs>
+      <rect x="18" y="18" width="220" height="220" rx="56" strokeWidth="12" className="fill-[#FFFDF8] stroke-[#282421] dark:fill-[#171615] dark:stroke-[#F6F2EA]" />
+      <path d="M66 175 L109 134 L142 161 L192 101" fill="none" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#282421] dark:stroke-[#F6F2EA]" />
+      <path d="M171 101 H192 V122" fill="none" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" className="stroke-[#282421] dark:stroke-[#F6F2EA]" />
+      <circle cx="201" cy="65" r="25" strokeWidth="7" fill={`url(#gold-l-${id})`} className="stroke-[#FFFDF8] dark:hidden" />
+      <circle cx="201" cy="65" r="25" strokeWidth="7" fill={`url(#gold-d-${id})`} className="hidden stroke-[#171615] dark:block" />
+      <circle cx="201" cy="65" r="7" className="fill-[#282421] dark:fill-[#171615]" />
     </svg>
   );
 }
 
+/** Lockup: mark + two-tone wordmark ("Brief" ink/cream, "Room" gold), as in the brand files. */
 export function Logo({ to = '/', className, compact }: { to?: string; className?: string; compact?: boolean }) {
   return (
     <Link to={to} className={cn('inline-flex items-center gap-2.5 rounded-md font-display text-[19px] font-semibold tracking-[-0.02em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)} aria-label="BriefRoom home">
       <LogoMark />
-      {!compact && <span>BriefRoom</span>}
+      {!compact && (
+        <span>
+          Brief<span className="text-[#B47B00] dark:bg-[linear-gradient(135deg,#FFE58A,#FFC928)] dark:bg-clip-text dark:text-transparent">Room</span>
+        </span>
+      )}
     </Link>
   );
 }

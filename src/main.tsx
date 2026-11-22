@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react';
 import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -17,6 +18,8 @@ const WorkOrder = lazy(() => import('./features/approvals/work-order-page'));
 const DesignSystem = lazy(() => import('./pages/design-system-page'));
 const Stats = lazy(() => import('./pages/stats-page'));
 const NotFound = lazy(() => import('./pages/not-found-page'));
+// Isolated motion-design preview (not linked from the product).
+const MotionLab = lazy(() => import('./features/motion-lab/motion-lab-page'));
 
 function ThemedToaster() {
   const { resolved } = useTheme();
@@ -27,6 +30,8 @@ function ThemedToaster() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
+      {/* One reduced-motion policy for the whole app: transforms and layout animation off, opacity kept. */}
+      <MotionConfig reducedMotion="user">
       <TooltipProvider delayDuration={300}>
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
@@ -39,12 +44,14 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/o/:orderId/work-order" element={<WorkOrder />} />
               <Route path="/design-system" element={<DesignSystem />} />
               <Route path="/stats" element={<Stats />} />
+              <Route path="/motion-lab" element={<MotionLab />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
         <ThemedToaster />
       </TooltipProvider>
+      </MotionConfig>
     </ThemeProvider>
   </StrictMode>,
 );

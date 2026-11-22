@@ -96,7 +96,7 @@ Labels: **Reference** = read from MastryHub CSS variables or computed styles (pr
 
 | Token | Value | Notes |
 |---|---|---|
-| `--background` | `#0F0F11` | Near-black with a cool hint; never pure `#000` |
+| `--background` | `#0B0A09` | Warm near-black (2.1 refresh, was `#0F0F11`); never pure `#000` |
 | `--surface` / `-secondary` / `-tertiary` / `-elevated` | `#16161A` / `#1C1C21` / `#25252B` / `#1E1E23` | Four distinct tonal layers: navigation, cards, insets, overlays |
 | `--foreground` / `--muted-foreground` | `#F3F2EE` / `#A6A49E` | Warm off-white text |
 | `--primary` / `-foreground` / `-hover` | `#F3F2EE` / `#121214` / `#DAD8D1` | Primary inverts to paper, as on MastryHub |
@@ -327,3 +327,21 @@ Dashboard: sidebar ≥ 1024, top bar + filter chips below. Order cards: 3 column
 | Show honest empty, error and offline states | Fake chat, fake users or fabricated numbers |
 | Design dark mode component by component | `filter: invert()` or auto-inverted colours |
 | Use subtle motion that explains change | Animate for decoration |
+
+
+## 2.1 visual refresh (2026-11-22)
+
+Approved direction: the "spatial workspace" reference (dark premium surfaces, warm golden light, glass panels, yellow actions). The identity is the same (ink and paper, serif, yellow highlighter), turned up a notch. Motion language: [docs/MOTION_DESIGN.md](docs/MOTION_DESIGN.md).
+
+| Change | Light | Dark |
+|---|---|---|
+| `--primary` (main action, active tab, selected state) | `#F6C343` with ink text `#17161A` (10.98:1) | `#F6C343` with ink text `#14110A` (11.49:1) |
+| `--primary-edge` (WCAG 1.4.11 boundary) | `#9A6D06` (4.22:1 on paper) | `#F6C343` (12.06:1) |
+| `--primary-text` (links, accent icons) | `#17161A` | `#F6C343` |
+| Surfaces | unchanged warm paper | warmer and deeper: background `#0B0A09`, surface `#151412`, secondary `#1B1A17`, border `#2A2722`, muted text `#AAA59A` |
+| `.app-shell` | page background + golden top light (`--glow`) | same, softer glow |
+| `.glass-panel` | translucent white, hairline border, inner highlight | translucent warm ink, hairline cream border, inner highlight |
+| Radii | sm 8 · md 10 · lg 14 · xl 18 · 2xl 22 px | same |
+| Logo | official files in `public/brand/`: cream tile + ink line (light), ink tile + cream line (dark), gold annotation ring; wordmark "Brief" + gold "Room" | same |
+
+All 80 contrast pairs pass with these values (`npm run check:contrast`). Print output stays light and flat (glow and glass are switched off in `@media print`).

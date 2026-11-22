@@ -1,5 +1,7 @@
 import { AlertCircle, Check, CheckCheck, CircleAlert, FileCheck2, FileClock, Handshake, ImagePlus, Images, Loader2, MapPin, MessageSquareText, Paperclip, PencilLine, RotateCcw, Send, ShieldCheck, Sparkles, WifiOff, type LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { EASE } from '@/components/motion/kit';
 import type { BrPayload } from '@shared/messages';
 import { cropBackground } from '@shared/geometry';
 import { roleLabel, type OrderView, type Role } from '@shared/types';
@@ -194,7 +196,7 @@ export function ChatPanel(p: ChatPanelProps) {
             const mine = m.senderUserId === p.myUserId || m.id.startsWith('local-');
             const role = roleOf(m.senderUserId);
             return (
-              <li key={m.id} className="flex flex-col gap-2.5">
+              <motion.li key={m.id} className="flex flex-col gap-2.5" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE.settle }}>
                 {showDay && (
                   <div className="my-1 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" aria-hidden>
                     <span className="h-px flex-1 bg-divider" />
@@ -239,7 +241,7 @@ export function ChatPanel(p: ChatPanelProps) {
                     </span>
                   </div>
                 )}
-              </li>
+              </motion.li>
             );
           })}
         </ol>

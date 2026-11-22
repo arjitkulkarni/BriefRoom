@@ -34,7 +34,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 export default function DesignSystemPage() {
   const { resolved } = useTheme();
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="app-shell min-h-dvh">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/90 px-4 backdrop-blur sm:px-6">
         <Logo />
         <span className="hidden text-sm font-semibold text-muted-foreground sm:inline">Design system · {resolved} theme</span>
@@ -50,7 +50,7 @@ export default function DesignSystemPage() {
         <Block title="Colour tokens">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {SWATCHES.map(([name, cls]) => (
-              <div key={name} className="overflow-hidden rounded-lg border border-border bg-surface">
+              <div key={name} className="overflow-hidden rounded-lg glass-panel">
                 <div className={`h-14 ${cls}`} />
                 <p className="px-2 py-1.5 font-mono text-[11px] text-muted-foreground">--{name}</p>
               </div>
@@ -281,7 +281,7 @@ export default function DesignSystemPage() {
             <EmptyState icon={Inbox} title="No briefs yet" action={<Button size="sm">Create a brief</Button>}>
               Create one or share your shop link.
             </EmptyState>
-            <div className="grid content-start gap-2 rounded-lg border border-border bg-surface p-4">
+            <div className="grid content-start gap-2 rounded-lg glass-panel p-4">
               <Skeleton className="h-4 w-2/3" />
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-24 w-full" />

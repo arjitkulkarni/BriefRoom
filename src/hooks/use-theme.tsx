@@ -8,7 +8,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 const KEY = 'br.theme';
-const META: Record<ResolvedTheme, string> = { light: '#f6f5f1', dark: '#0f0f11' };
+const META: Record<ResolvedTheme, string> = { light: '#f6f5f1', dark: '#0b0a09' };
 
 function readPreference(): ThemePreference {
   try {

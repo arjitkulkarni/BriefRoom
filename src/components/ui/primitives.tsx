@@ -27,7 +27,7 @@ export function Badge({ className, tone, ...p }: HTMLAttributes<HTMLSpanElement>
 /* ------------------------------------------------------------------ Card */
 
 export function Card({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('rounded-lg border border-border bg-surface shadow-xs', className)} {...p} />;
+  return <div className={cn('glass-panel rounded-xl', className)} {...p} />;
 }
 export function CardHeader({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('flex items-start justify-between gap-3 px-5 pt-5', className)} {...p} />;

@@ -152,7 +152,7 @@ export function AnnotationThread({ a, reference, role, locked, busy, actions, na
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-surface-secondary p-3">
+      <div className="rounded-lg glass-panel-secondary p-3">
         {a.status === 'resolved' ? (
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[13px] text-foreground">

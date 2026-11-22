@@ -101,7 +101,7 @@ export function SpecEditor({ order, role, locked, saving, onSave }: { order: Ord
           </p>
         )}
         {t.groups.map((g) => (
-          <fieldset key={g} className="grid gap-4 rounded-lg border border-border bg-surface p-4">
+          <fieldset key={g} className="grid gap-4 rounded-lg glass-panel p-4">
             <legend className="px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">{g}</legend>
             <div className="grid gap-4 sm:grid-cols-2">
               {t.fields

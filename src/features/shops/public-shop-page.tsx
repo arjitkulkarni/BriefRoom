@@ -60,7 +60,7 @@ export default function PublicShopPage() {
   const Icon = CATEGORY_ICON[shop.category as keyof typeof CATEGORY_ICON] ?? CATEGORY_ICON.cake;
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="app-shell min-h-dvh">
       <header className="mx-auto flex h-16 max-w-xl items-center justify-between px-4">
         <span className="text-xs font-semibold text-muted-foreground">Custom orders by</span>
         <ThemeToggle />
@@ -83,7 +83,7 @@ export default function PublicShopPage() {
           </div>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+        <div className="mt-8 rounded-2xl glass-panel p-5 shadow-sm sm:p-6">
           <h2 className="text-lg font-bold text-foreground">Let’s design your order together</h2>
           <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground">
             {['Share photos of what you like', 'Mark exactly what to keep or change', 'Approve one final version with the seller'].map((t) => (

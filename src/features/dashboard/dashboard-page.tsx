@@ -1,5 +1,7 @@
 import { Activity, ArrowRight, Copy, ExternalLink, Inbox, KeyRound, LayoutGrid, Link2, MessageSquare, Plus, Search, Store } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EASE } from '@/components/motion/kit';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { TEMPLATES, templateFor } from '@shared/templates';
 import { isBrMessage } from '@shared/messages';
@@ -130,7 +132,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
       <div className="flex h-16 items-center px-5">
         <Logo to={`/seller/${shop.id}`} />
       </div>
-      <div className="mx-3 flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-3">
+      <div className="mx-3 flex items-center gap-3 rounded-lg glass-panel-secondary p-3">
         <span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground">
           <ShopIcon className="size-5" aria-hidden />
         </span>
@@ -177,7 +179,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
   );
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="app-shell flex min-h-dvh">
       {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur sm:px-6">
@@ -270,10 +272,10 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
                 </EmptyState>
               ) : (
                 <ul className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-                  {visible.map((o) => (
-                    <li key={o.id}>
+                  {visible.map((o, i) => (
+                    <motion.li key={o.id} layout="position" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: Math.min(i, 8) * 0.045, ease: EASE.settle, layout: { duration: 0.35, ease: EASE.glide } }}>
                       <OrderCard o={o} onOpen={() => nav(`/o/${o.id}`)} />
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               )}
@@ -287,8 +289,8 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
                 <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">Activity from all orders appears here.</p>
               ) : (
                 <ol className="relative grid gap-3 border-l border-divider pl-4">
-                  {activity.slice(0, 14).map((e) => (
-                    <li key={e.id} className="relative">
+                  {activity.slice(0, 14).map((e, i) => (
+                    <motion.li key={e.id} className="relative" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: Math.min(i, 10) * 0.03, ease: EASE.settle }}>
                       <span className="absolute -left-[21px] top-1.5 size-2.5 rounded-full border-2 border-background bg-border-strong" aria-hidden />
                       <Link to={`/o/${e.orderId}`} className="block rounded-md text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         <span className="text-foreground">{e.summary}</span>
@@ -296,7 +298,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
                       <p className="text-xs text-muted-foreground">
                         {e.orderTitle} · {ago(e.createdAt)}
                       </p>
-                    </li>
+                    </motion.li>
                   ))}
                 </ol>
               )}
@@ -336,9 +338,9 @@ function OrderCard({ o, onOpen }: { o: OrderSummary; onOpen: () => void }) {
   const next = ORDER_STATUS_META[o.status].nextAction.seller;
   const Icon = CATEGORY_ICON[o.template as keyof typeof CATEGORY_ICON] ?? Store;
   return (
-    <button onClick={onOpen} className="group flex h-full w-full flex-col rounded-xl border border-border bg-surface text-left shadow-xs transition-[box-shadow,border-color] hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <button onClick={onOpen} className="group flex h-full w-full flex-col rounded-xl glass-panel text-left shadow-xs transition-[box-shadow,border-color] hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <div className="flex gap-3 p-4">
-        <div className="size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-secondary">
+        <div className="size-16 shrink-0 overflow-hidden rounded-lg glass-panel-secondary">
           {o.thumbnailUrl ? <img src={o.thumbnailUrl} alt="" className="size-full object-cover" loading="lazy" /> : <Icon className="m-auto mt-5 size-6 text-muted-foreground" aria-hidden />}
         </div>
         <div className="min-w-0 flex-1">

@@ -43,7 +43,7 @@ export default function StartShopPage() {
   });
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="app-shell min-h-dvh">
       <header className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
         <Logo />
         <ThemeToggle />
@@ -58,7 +58,7 @@ export default function StartShopPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl glass-panel p-6 shadow-sm sm:p-8">
           {created ? (
             <div className="grid gap-5">
               <span className="grid size-12 place-items-center rounded-full bg-success-bg text-success-text">
