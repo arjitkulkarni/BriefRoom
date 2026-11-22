@@ -19,3 +19,13 @@ playwright-report/
 test-results/
 
 *_Master_Prompt.md
+
+# Vercel function bundle (built by npm run build:api)
+api/_server.mjs
+.vercel
+
+.vercel
+.env*
+
+# Local demo recording
+BriefRoom_demo.mp4
