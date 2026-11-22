@@ -66,14 +66,14 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
   await noOverflow(buyer, 'buyer workspace (390px)');
 
   // 6. Buyer marks the flower/berry region and asks for ivory roses.
-  await buyer.getByRole('radio', { name: /Mark area/ }).click();
+  await buyer.getByRole('radio', { name: /Draw a box/ }).click();
   const stage = buyer.locator('img[alt^="Reference"]').locator('xpath=..');
   const box = (await stage.boundingBox())!;
   await stage.click({ position: { x: box.width * 0.48, y: box.height * 0.32 } });
   const composer = buyer.getByRole('dialog', { name: 'New annotation' });
-  await composer.getByRole('radio', { name: 'Colour' }).click();
+  await composer.getByRole('radio', { name: /^Colour/ }).click();
   await composer.getByLabel(/Which colour should this be/).fill('Can we change these to ivory roses?');
-  await composer.getByRole('button', { name: 'Save & notify' }).click();
+  await composer.getByRole('button', { name: 'Save & send' }).click();
   await expect(buyer.getByText(/Marked #1/)).toBeVisible();
   await buyer.keyboard.press('Escape');
 
@@ -103,7 +103,7 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
   await expect(seller.getByText(/Resolved — confirmed by you/)).toBeVisible();
 
   // 10. Clarification Radar + ambiguity check find missing details; seller asks the customer.
-  await seller.getByRole('tab', { name: /Radar/ }).click();
+  await seller.getByRole('tab', { name: /To-do/ }).click();
   await seller.getByRole('button', { name: 'Check the brief' }).click();
   const sizeSuggestion = seller.locator('article').filter({ hasText: /exact size/i }).first();
   await expect(sizeSuggestion).toBeVisible();
@@ -113,11 +113,11 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
 
   // 11. Buyer resolves the critical clarification with an answer.
   await buyer.reload();
-  await buyer.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: /Radar/ }).click();
+  await buyer.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: /To-do/ }).click();
   await buyer.getByLabel(/Answer that resolves it/).first().fill('1 kg please');
   await buyer.getByRole('button', { name: 'Resolve' }).first().click();
   await expect(buyer.getByText('1 kg please').first()).toBeVisible();
-  // Critical item resolved → status leaves "Awaiting clarification" (the visible badge is in the mobile status strip).
+  // Critical item resolved → status leaves "Questions open" (the visible badge is in the mobile status strip).
   await expect(buyer.getByText('Collecting details').filter({ visible: true }).first()).toBeVisible();
   await noOverflow(buyer, 'buyer radar');
 
@@ -135,7 +135,7 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
   await expect(seller.getByText('All changes saved')).toBeVisible();
 
   // 13. Seller proposes version 1.
-  await seller.getByRole('button', { name: 'Propose v1' }).click();
+  await seller.getByRole('button', { name: 'Send for approval' }).click();
   await seller.getByRole('button', { name: 'Freeze & send version 1' }).click();
   await expect(seller.getByText('Version 1 needs both approvals')).toBeVisible();
 
@@ -154,7 +154,7 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
   await seller.getByLabel('Quoted price (₹)').fill('2400');
   await seller.getByRole('button', { name: 'Save & notify' }).click();
   await expect(seller.getByText('All changes saved')).toBeVisible();
-  await seller.getByRole('button', { name: 'Propose v2' }).click();
+  await seller.getByRole('button', { name: 'Send for approval' }).click();
   await seller.getByRole('button', { name: 'Freeze & send version 2' }).click();
   await expect(seller.getByText('Version 2 needs both approvals')).toBeVisible();
 
@@ -173,7 +173,7 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
 
   // 18. Seller approves the same version.
   await seller.reload();
-  await seller.getByRole('button', { name: 'Review v2' }).click();
+  await seller.getByRole('button', { name: 'Review & approve', exact: true }).click();
   await seller.getByRole('button', { name: 'Approve version 2' }).first().click();
   await seller.getByRole('dialog').getByRole('button', { name: 'Approve version 2' }).click();
 
@@ -199,7 +199,7 @@ test('seller (desktop) and buyer (mobile) agree on version 2 and get a work orde
 
   // The buyer sees the agreement too (phone: Versions tab).
   await buyer.reload();
-  await buyer.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: /Versions/ }).click();
+  await buyer.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: /Approve/ }).click();
   await expect(buyer.getByText('Order agreed').first()).toBeVisible();
   await noOverflow(buyer, 'buyer agreement');
 
