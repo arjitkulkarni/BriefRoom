@@ -1,7 +1,7 @@
 # Render Blueprint. Neon (Postgres + Object Storage) holds all state, so the web service is stateless:
 # no persistent disk is needed. The Ohio region matches the Neon project's AWS us-east-2.
 #
-# Before creating it, read README → "Deployment". Values marked `sync: false` are asked for once, when
+# Before creating it, read docs/RELEASE_VERIFICATION.md → "Deploying (Render)". Values marked `sync: false` are asked for once, when
 # the Blueprint is first created (Render ignores them on later Blueprint syncs — edit them in the
 # service's Environment tab instead). Use the PRODUCTION Neon branch values, never the dev branch.
 services:

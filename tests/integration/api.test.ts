@@ -1,7 +1,7 @@
 /**
  * Integration tests: real migrations on a real Postgres engine (PGlite) through the real HTTP API.
  * Nexconn is a recording fake here — these tests prove our outbox, idempotency and agreement
- * logic, not the live Nexconn service (see README → "Verifying Nexconn with real credentials").
+ * logic, not the live Nexconn service (live checks: docs/RELEASE_VERIFICATION.md).
  */
 import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';

@@ -7,7 +7,7 @@ data/
 *.log
 .DS_Store
 .neon
-
+submission/
 # OS / editor / tooling
 Thumbs.db
 desktop.ini

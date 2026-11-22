@@ -11,7 +11,7 @@ import { createContext } from './context.ts';
 const { config, errors, warnings } = loadConfig();
 for (const w of warnings) console.warn(`  ! ${w}`);
 if (errors.length) {
-  console.error('\nBriefRoom cannot start — fix these environment settings (see .env.example and README "Environment"):\n');
+  console.error('\nBriefRoom cannot start — fix these environment settings (see .env.example and docs/CONFIGURATION.md):\n');
   for (const e of errors) console.error(`  ✗ ${e}`);
   console.error('');
   process.exit(1);

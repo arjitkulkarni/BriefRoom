@@ -158,6 +158,14 @@ Key decisions (justified in `docs/FRONTEND_IMPLEMENTATION_PLAN.md` and `README.m
   * Playwright E2E: **4/4**. Golden path with seller on 1440 px desktop and buyer on a 390 px touch phone, all 21 steps through the A4 work order and in-browser fingerprint verification. Theme persistence with no flash, and System mode. No overflow or console errors at 1440/1280/1024/768/390/360 px in both themes. Mobile touch targets ≥ 40 px.
   * Neon smoke test against the real project on the final build: passed.
   * Live Nexconn not tested (no credentials).
+* **Stage 13 (motion + 2.1 visual refresh, 2026-11-22)**:
+  * Motion research (`docs/MOTION_RESEARCH.md`, real browser inspection) → three concepts at `/motion-lab` (`docs/MOTION_CONCEPTS.md`) → owner-approved reference design implemented. Stack: Motion (already installed) plus CSS 3D, with no WebGL and no new dependencies.
+  * Landing hero rebuilt (`hero-spatial.tsx`). App-wide refresh through tokens and shared components (yellow primary with a WCAG edge, warm dark palette, glass panels, golden page light, radii, official logo files in `public/brand/`). Global `MotionConfig reducedMotion="user"`. Scroll reveals on the landing; motion in the dashboard, chat and radar.
+  * QA:
+    * typecheck clean; unit + integration **38/38**; default E2E **4/4** (live spec skipped by design); live Nexconn spec re-run after the refresh;
+    * contrast **80/80** after syncing the checker with the new tokens (it had still been checking the old values). It caught yellow-on-paper at 1.5:1, fixed with `--primary-edge` #9A6D06 (4.22:1);
+    * final screenshots of every screen in both themes with no console errors or overflow (`docs/screenshots/`, `docs/motion-previews/final/`).
+  * Submission package in `submission/`: form values, write-up, and a 6-page PDF rebuilt from the verified screenshots.
 * **Stage 12 (release verification, 2026-11-22, with the user's credentials)**:
   * Neon: local work moved to a new `dev` branch (`br-restless-bread-bdp7u1j7`, 7-day TTL from the `neon.ts` policy); `production` (`br-purple-fire-bd2vysci`) is used only for the production boot check. `.env.local` keeps the user's keys (the CLI rewrites only Neon variables).
   * Nexconn: the key pair in `.env.local` is valid in data centre **sg**. `NEXCONN_REGION` was set to `sa` (the `sa` host answered "App-Key is not exist") and was corrected to `sg`. The Console shows a single key pair for the app, labelled *AppKey-Production* (data centre Singapore, Chat Free), so the Render Blueprint uses it as `NEXCONN_ENVIRONMENT=production` / `NEXCONN_PROD_*`.

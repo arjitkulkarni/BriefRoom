@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="BriefRoom icon">
+  <rect x="18" y="18" width="220" height="220" rx="56" fill="#171615" stroke="#F6F2EA" stroke-width="12"/>
+  <path d="M66 175 L109 134 L142 161 L192 101" fill="none" stroke="#F6F2EA" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M171 101 H192 V122" fill="none" stroke="#F6F2EA" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="201" cy="65" r="25" fill="#FFD13D" stroke="#171615" stroke-width="7"/>
+  <circle cx="201" cy="65" r="7" fill="#171615"/>
+</svg>
