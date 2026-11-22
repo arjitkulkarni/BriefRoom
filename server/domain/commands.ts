@@ -318,7 +318,7 @@ export function createCommands(core: CoreService) {
         const a = formatValue(f, before[key]);
         const b = formatValue(f, value);
         if (a === b) continue;
-        lines.push(a === '—' ? `${f.label}: ${b}` : `${f.label}: ${a} → ${b}`);
+        lines.push(a === '—' ? `${f.label}: ${b}` : b === '—' ? `${f.label}: cleared (was ${a})` : `${f.label}: ${a} → ${b}`);
         if (b === '—') await tx.delete(specifications).where(and(eq(specifications.orderId, o.id), eq(specifications.fieldKey, key)));
         else
           await tx
