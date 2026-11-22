@@ -8,6 +8,11 @@ import { connectPglite, connectPostgres } from './client.ts';
 
 const { config } = loadConfig();
 const target = config.database.url;
+if (!target && process.env.VERCEL) {
+  // A Vercel build without database settings: nothing to migrate (the API reports itself misconfigured).
+  console.warn('[migrate] skipped: DATABASE_URL is not set for this Vercel build');
+  process.exit(0);
+}
 const handle = target ? await connectPostgres(target, config.database.migrationUrl) : await connectPglite(config.database.embeddedDir);
 const where = target ? new URL(config.database.migrationUrl ?? target).host : `PGlite ${config.database.embeddedDir}`;
 
