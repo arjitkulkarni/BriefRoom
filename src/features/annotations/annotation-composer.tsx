@@ -8,6 +8,17 @@ import { KIND_ICON, TONE_CLASSES } from './annotation-meta';
 import type { PendingRegion } from './reference-canvas';
 
 const COLOUR_KINDS = new Set<AnnotationKind>(['colour', 'change', 'add', 'custom']);
+/** One plain sentence per choice, so nobody has to guess what a label means. */
+const KIND_HINT: Record<AnnotationKind, string> = {
+  keep: 'Don’t touch this part',
+  change: 'Make this part different',
+  colour: 'Use a different colour',
+  remove: 'Take this part out',
+  add: 'Put something new here',
+  question: 'Not sure? Ask first',
+  custom: 'Something else',
+};
+
 const SWATCHES = ['#f4ebd9', '#f7d6dc', '#e8b4bc', '#c9a227', '#9bb59a', '#a8c5da', '#5b4b8a', '#1f1f24'];
 
 export interface AnnotationDraft {
@@ -47,14 +58,16 @@ export function AnnotationComposer({ region, imageUrl, busy, onSave, onCancel, c
       <div className="flex items-center gap-3">
         <div className="size-14 shrink-0 rounded-md border border-border bg-surface-secondary bg-no-repeat" style={{ backgroundImage: `url("${imageUrl}")`, ...crop }} aria-hidden />
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">{region.shape === 'point' ? 'Point selected' : 'Area selected'}</p>
-          <p className="text-[13px] text-muted-foreground">Say exactly what should happen here.</p>
+          <p className="text-[15px] font-bold text-foreground">{region.shape === 'point' ? 'You picked this spot' : 'You picked this part'}</p>
+          <p className="text-[13px] text-muted-foreground">Two quick steps, then the other person sees it.</p>
         </div>
       </div>
 
       <fieldset>
-        <legend className="mb-2 text-[13px] font-semibold text-foreground">Type</legend>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3" role="radiogroup">
+        <legend className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+          <Step n={1} /> What do you want here?
+        </legend>
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3" role="radiogroup" aria-label="What do you want here?">
           {ANNOTATION_KINDS.map((k) => {
             const m = ANNOTATION_KIND_META[k];
             const Icon = KIND_ICON[k];
@@ -68,12 +81,15 @@ export function AnnotationComposer({ region, imageUrl, busy, onSave, onCancel, c
                 aria-checked={on}
                 onClick={() => setKind(k)}
                 className={cn(
-                  'flex min-h-10 items-center gap-2 rounded-md border px-2.5 text-left text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  on ? cn(t.border, t.soft, t.text) : 'border-border bg-surface text-muted-foreground hover:bg-surface-secondary hover:text-foreground',
+                  'flex min-h-12 items-center gap-2 rounded-md border px-2.5 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  on ? cn('border-2', t.border, t.soft, t.text) : 'border-border bg-surface text-foreground hover:bg-surface-secondary',
                 )}
               >
-                <Icon className="size-4 shrink-0" aria-hidden />
-                {m.short}
+                <Icon className="size-5 shrink-0" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-[13px] font-bold leading-tight">{m.short}</span>
+                  <span className={cn('block text-[11px] leading-tight', on ? 'opacity-90' : 'text-muted-foreground')}>{KIND_HINT[k]}</span>
+                </span>
               </button>
             );
           })}
@@ -81,8 +97,8 @@ export function AnnotationComposer({ region, imageUrl, busy, onSave, onCancel, c
       </fieldset>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="ann-note">
-          {meta.prompt}
+        <Label htmlFor="ann-note" className="flex items-center gap-2 text-sm font-bold">
+          <Step n={2} /> {meta.prompt}
           {needsNote && <span className="text-destructive"> *</span>}
         </Label>
         <Textarea
@@ -103,7 +119,7 @@ export function AnnotationComposer({ region, imageUrl, busy, onSave, onCancel, c
         <div className="grid gap-2">
           <label className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
             <input type="checkbox" className="size-4 accent-primary" checked={useColor} onChange={(e) => setUseColor(e.target.checked)} />
-            Attach an exact colour
+            Show the exact colour I want
           </label>
           {useColor && (
             <div className="flex flex-wrap items-center gap-2">
@@ -132,9 +148,17 @@ export function AnnotationComposer({ region, imageUrl, busy, onSave, onCancel, c
           Cancel
         </Button>
         <Button type="submit" loading={busy}>
-          Save & notify
+          Save & send
         </Button>
       </div>
     </form>
+  );
+}
+
+function Step({ n }: { n: number }) {
+  return (
+    <span className="grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground" aria-hidden>
+      {n}
+    </span>
   );
 }
