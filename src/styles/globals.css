@@ -343,6 +343,13 @@
   border: 1px solid var(--glass-border);
   box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-md);
 }
+/* Elevated panel floating over the image (e.g. the annotation composer): fully opaque so the
+   photo underneath never shows through the text. */
+.glass-panel-elevated {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-strong, var(--glass-border));
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 24px 60px -12px rgb(0 0 0 / 0.55);
+}
 
 .canvas-surface {
   background-color: var(--canvas);
