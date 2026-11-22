@@ -91,7 +91,10 @@ export const api = {
     req<{ groups: { groupId: string; name: string; memberCount: number }[] }>(`/api/nexconn/groups?shopId=${shopId}&ids=${encodeURIComponent(ids.join(','))}`, { key }),
   members: (shopId: string, key: string, channelId: string) => req<{ members: { userId: string }[] }>(`/api/nexconn/groups/${channelId}/members?shopId=${shopId}`, { key }),
   stats: () => req<Record<string, number>>('/api/stats'),
+  demo: () => req<DemoSession>('/api/demo', { body: {} }),
 };
+
+export type DemoSession = { shopId: string; orderId: string; sellerKey: string; customerKey: string };
 
 export async function shareBase(): Promise<string> {
   const c = await getConfig().catch(() => null);
