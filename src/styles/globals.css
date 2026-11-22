@@ -1,0 +1,402 @@
+/*
+ * BriefRoom design tokens — the ONLY place colours are defined (design.md §4).
+ * Themes switch by swapping these variables on <html data-theme>. Components use semantic
+ * utilities (bg-surface, text-muted-foreground, border-input …) and never raw hex values.
+ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ------------------------------------------------------------------ Light (default) */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --background: #f6f5f1;
+  --foreground: #17161a;
+  --surface: #ffffff;
+  --surface-secondary: #f1efea;
+  --surface-tertiary: #e9e6df;
+  --surface-elevated: #ffffff;
+
+  --primary: #f6c343;
+  --primary-foreground: #17161a;
+  --primary-hover: #eeb52a;
+  --primary-soft: #fcf1c7;
+  --primary-text: #17161a;
+  --secondary: #eceae4;
+  --secondary-foreground: #17161a;
+  --secondary-hover: #e2dfd7;
+  --accent: #f6c343;
+  --accent-foreground: #17161a;
+
+  --muted: #eeece6;
+  --muted-foreground: #64625c;
+  --border: #e2dfd7;
+  --border-strong: #8e8a81;
+  --divider: #ebe8e1;
+  --input: #8e8a81;
+  --ring: #17161a;
+  --placeholder: #75726b;
+
+  --success: #1d7a46;
+  --success-foreground: #ffffff;
+  --success-hover: #16663a;
+  --success-bg: #e5f3eb;
+  --success-text: #16663a;
+  --warning: #b45309;
+  --warning-bg: #fcf0db;
+  --warning-text: #8a4006;
+  --destructive: #c4302b;
+  --destructive-foreground: #ffffff;
+  --destructive-hover: #a52722;
+  --destructive-bg: #fce8e7;
+  --destructive-text: #a52722;
+  --info: #2d5bcc;
+  --info-bg: #e8eefc;
+  --info-text: #2449a8;
+
+  /* Annotation semantics (marker solids are identical in both themes: they sit on photos) */
+  --ann-keep: #1d7a46;
+  --ann-keep-bg: #e5f3eb;
+  --ann-keep-text: #16663a;
+  --ann-change: #2d5bcc;
+  --ann-change-bg: #e8eefc;
+  --ann-change-text: #2449a8;
+  --ann-remove: #c4302b;
+  --ann-remove-bg: #fce8e7;
+  --ann-remove-text: #a52722;
+  --ann-question: #7a3fd1;
+  --ann-question-bg: #f1eafc;
+  --ann-question-text: #6331b5;
+  --ann-add: #b25a00;
+  --ann-add-bg: #fcefdf;
+  --ann-add-text: #8c4700;
+  --ann-on: #ffffff;
+
+  --overlay: rgb(23 22 26 / 0.45);
+  --tooltip: #17161a;
+  --tooltip-foreground: #ffffff;
+  --skeleton: #e9e6df;
+  --canvas: #e9e7e1;
+  --canvas-dot: #d7d3ca;
+  --canvas-dim: rgb(23 22 26 / 0.28);
+  --marker-ring: #ffffff;
+  --marker-fill: rgb(255 255 255 / 0.08);
+  --marker-fill-hover: rgb(255 255 255 / 0.2);
+  --bubble-own: #fcf4d6;
+  --bubble-own-border: #f0dc97;
+  --bubble-other: #ffffff;
+  --bubble-other-border: #e2dfd7;
+  --activity: #fbfaf7;
+
+  --shadow-color: 23 22 26;
+  --elev-xs: 0 1px 2px rgb(var(--shadow-color) / 0.06);
+  --elev-sm: 0 1px 3px rgb(var(--shadow-color) / 0.08), 0 1px 2px rgb(var(--shadow-color) / 0.04);
+  --elev-md: 0 6px 16px -4px rgb(var(--shadow-color) / 0.12);
+  --elev-lg: 0 14px 36px -10px rgb(var(--shadow-color) / 0.2);
+  --elev-xl: 0 28px 64px -16px rgb(var(--shadow-color) / 0.3);
+
+  /* 2.1 visual refresh — warm light, glass panels */
+  --glow: rgb(246 195 67 / 0.2);
+  --glow-soft: rgb(246 195 67 / 0.1);
+  --glass: rgb(255 255 255 / 0.82);
+  --glass-border: rgb(23 22 26 / 0.09);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --primary-glow: 0 10px 28px -10px rgb(214 160 20 / 0.55);
+  /* Yellow on paper is 1.5:1, so primary controls get a dark-gold edge (4.2:1, WCAG 1.4.11). */
+  --primary-edge: #9a6d06;
+}
+
+/* ------------------------------------------------------------------ Dark (designed, not inverted) */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --background: #0b0a09;
+  --foreground: #f5f2ea;
+  --surface: #151412;
+  --surface-secondary: #1b1a17;
+  --surface-tertiary: #24221e;
+  --surface-elevated: #1d1b18;
+
+  --primary: #f6c343;
+  --primary-foreground: #14110a;
+  --primary-hover: #f9d061;
+  --primary-soft: #2b2312;
+  --primary-text: #f6c343;
+  --secondary: #24221e;
+  --secondary-foreground: #f5f2ea;
+  --secondary-hover: #2d2a25;
+  --accent: #f6c343;
+  --accent-foreground: #14110a;
+
+  --muted: #1d1b18;
+  --muted-foreground: #aaa59a;
+  --border: #2a2722;
+  --border-strong: #6e6a62;
+  --divider: #221f1c;
+  --input: #6e6a62;
+  --ring: #f6c343;
+  --placeholder: #8c8a92;
+
+  --success: #1d7a46;
+  --success-foreground: #ffffff;
+  --success-hover: #228e52;
+  --success-bg: #10261a;
+  --success-text: #6cd39a;
+  --warning: #b45309;
+  --warning-bg: #2a1e0c;
+  --warning-text: #f4b157;
+  --destructive: #c4302b;
+  --destructive-foreground: #ffffff;
+  --destructive-hover: #d93b35;
+  --destructive-bg: #2c1413;
+  --destructive-text: #ff8f89;
+  --info: #2d5bcc;
+  --info-bg: #121c34;
+  --info-text: #93b2ff;
+
+  --ann-keep-bg: #12271b;
+  --ann-keep-text: #6cd39a;
+  --ann-change-bg: #131d35;
+  --ann-change-text: #93b2ff;
+  --ann-remove-bg: #2e1515;
+  --ann-remove-text: #ff8f89;
+  --ann-question-bg: #231636;
+  --ann-question-text: #c6a6ff;
+  --ann-add-bg: #2c1d0b;
+  --ann-add-text: #f5ae5c;
+
+  --overlay: rgb(0 0 0 / 0.62);
+  --tooltip: #f5f2ea;
+  --tooltip-foreground: #14110a;
+  --skeleton: #24221e;
+  --canvas: #090807;
+  --canvas-dot: #1f1d19;
+  --canvas-dim: rgb(0 0 0 / 0.4);
+  --bubble-own: #2a2416;
+  --bubble-own-border: #4d401d;
+  --bubble-other: #1b1a17;
+  --bubble-other-border: #2a2722;
+  --activity: #191815;
+
+  --shadow-color: 0 0 0;
+  --elev-xs: 0 1px 2px rgb(0 0 0 / 0.5);
+  --elev-sm: 0 1px 3px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.02);
+  --elev-md: 0 8px 20px -6px rgb(0 0 0 / 0.6);
+  --elev-lg: 0 16px 40px -10px rgb(0 0 0 / 0.7);
+  --elev-xl: 0 30px 70px -16px rgb(0 0 0 / 0.8);
+
+  --glow: rgb(246 195 67 / 0.14);
+  --glow-soft: rgb(246 195 67 / 0.06);
+  --glass: rgb(24 22 19 / 0.78);
+  --glass-border: rgb(255 244 214 / 0.09);
+  --glass-highlight: rgb(255 244 214 / 0.06);
+  --primary-glow: 0 10px 30px -10px rgb(246 195 67 / 0.5);
+  --primary-edge: #f6c343;
+}
+
+/* ------------------------------------------------------------------ Tailwind mapping */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-divider: var(--divider);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-placeholder: var(--placeholder);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-hover: var(--success-hover);
+  --color-success-bg: var(--success-bg);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-text: var(--warning-text);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-destructive-bg: var(--destructive-bg);
+  --color-destructive-text: var(--destructive-text);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-text: var(--info-text);
+  --color-ann-keep: var(--ann-keep);
+  --color-ann-keep-bg: var(--ann-keep-bg);
+  --color-ann-keep-text: var(--ann-keep-text);
+  --color-ann-keep-on: var(--ann-on);
+  --color-ann-change: var(--ann-change);
+  --color-ann-change-bg: var(--ann-change-bg);
+  --color-ann-change-text: var(--ann-change-text);
+  --color-ann-change-on: var(--ann-on);
+  --color-ann-remove: var(--ann-remove);
+  --color-ann-remove-bg: var(--ann-remove-bg);
+  --color-ann-remove-text: var(--ann-remove-text);
+  --color-ann-remove-on: var(--ann-on);
+  --color-ann-question: var(--ann-question);
+  --color-ann-question-bg: var(--ann-question-bg);
+  --color-ann-question-text: var(--ann-question-text);
+  --color-ann-question-on: var(--ann-on);
+  --color-ann-add: var(--ann-add);
+  --color-ann-add-bg: var(--ann-add-bg);
+  --color-ann-add-text: var(--ann-add-text);
+  --color-ann-add-on: var(--ann-on);
+  --color-overlay: var(--overlay);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
+  --color-skeleton: var(--skeleton);
+  --color-canvas: var(--canvas);
+  --color-canvas-dim: var(--canvas-dim);
+  --color-marker-ring: var(--marker-ring);
+  --color-marker-fill: var(--marker-fill);
+  --color-marker-fill-hover: var(--marker-fill-hover);
+  --color-bubble-own: var(--bubble-own);
+  --color-bubble-own-border: var(--bubble-own-border);
+  --color-bubble-other: var(--bubble-other);
+  --color-bubble-other-border: var(--bubble-other-border);
+  --color-activity: var(--activity);
+
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
+
+  --shadow-xs: var(--elev-xs);
+  --shadow-sm: var(--elev-sm);
+  --shadow-md: var(--elev-md);
+  --shadow-lg: var(--elev-lg);
+  --shadow-xl: var(--elev-xl);
+}
+
+/* ------------------------------------------------------------------ Base */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 55%, transparent);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Components draw their own ring; avoid doubling it. */
+  [class*='focus-visible:ring']:focus-visible {
+    outline: none;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  input[type='color'] {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/* Dotted work surface behind the reference image: keeps the image from blending into panels. */
+/* Page shell: the background plus warm golden light from the top (2.1 refresh). */
+.app-shell {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(70rem 34rem at 78% -14rem, var(--glow), transparent 70%),
+    radial-gradient(46rem 28rem at -8% -8rem, var(--glow-soft), transparent 70%);
+  background-repeat: no-repeat;
+}
+/* Glass panel: translucent surface, hairline border, inner top highlight. */
+.glass-panel {
+  background-color: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-md);
+}
+
+.canvas-surface {
+  background-color: var(--canvas);
+  background-image: radial-gradient(var(--canvas-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Reduced motion: keep state changes, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ Print (work order, A4) */
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+@media print {
+  :root,
+  [data-theme='dark'] {
+    /* Paper is always light, whatever the screen theme. */
+    --background: #ffffff;
+    --glow: transparent;
+    --glow-soft: transparent;
+    --glass: #ffffff;
+    --glass-border: #d9d9d4;
+    --glass-highlight: transparent;
+    --primary-glow: none;
+    --foreground: #111111;
+    --surface: #ffffff;
+    --surface-secondary: #f4f4f2;
+    --muted-foreground: #555555;
+    --border: #d9d9d4;
+    --divider: #e6e6e2;
+    --success-bg: #eef7f1;
+    --success-text: #14532d;
+    color-scheme: light;
+  }
+  body {
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-avoid-break {
+    break-inside: avoid;
+  }
+}

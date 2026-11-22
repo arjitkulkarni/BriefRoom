@@ -30,7 +30,7 @@ What's already public (50–60+ ideas): Discord clones, community help chats, sp
 1. Create the Nexconn app (Singapore). Put the App Key and Secret in `.env`. Run `npm run dev`.
 2. Run the golden path on **two devices** (laptop = seller, phone = customer):
    create shop → create brief → open the customer link → upload photo → pin 3 regions (one colour pin) → fill details → seller sets price → propose v1 → customer requests changes → seller edits and proposes v2 → customer approves → **Agreed** → work order.
-3. Note **every** error code or glitch and send it to Claude to fix. Expect 1–3 small integration fixes (Chat UI layout, group visibility).
+3. Note **every** error code or glitch and log it and fix it. Expect 1–3 small integration fixes (Chat UI layout, group visibility).
 
 ### Block B: deploy (1 h)
 1. Push to a **public GitHub repo** (required).
@@ -87,7 +87,7 @@ Paste the write-up from [SUBMISSION.md](SUBMISSION.md). Add the App Key, links, 
 ## 6. Risks and fallbacks
 | Risk | Fallback |
 |---|---|
-| A Chat UI layout or group visibility issue | Send the exact error code to Claude. The brief flow is independent of the chat UI and still works |
+| A Chat UI layout or group visibility issue | Log the exact error code and fix it. The brief flow is independent of the chat UI and still works |
 | Bakers don't reply in time | Friends and family as customers through *your own* demo bakery shop with genuine orders, and college club merch orders |
 | Render disk or deploy trouble | Railway or Fly.io; any Node host works |
 | Running out of time | Cut nothing from the golden path. Skip the inbox polish and extra templates in the video |

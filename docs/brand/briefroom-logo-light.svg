@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">BriefRoom logo — light version</title>
+  <desc id="desc">A rounded visual canvas with a rising collaboration line and a yellow annotation marker, followed by the BriefRoom wordmark.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5C94C"/>
+      <stop offset="1" stop-color="#D99A00"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(28 34)">
+    <rect x="0" y="0" width="220" height="220" rx="56" fill="#FFFDF8" stroke="#282421" stroke-width="12"/>
+    <path d="M48 157 L91 116 L124 143 L174 83" fill="none" stroke="#282421" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M153 83 H174 V104" fill="none" stroke="#282421" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="183" cy="47" r="25" fill="url(#gold)" stroke="#FFFDF8" stroke-width="7"/>
+    <circle cx="183" cy="47" r="7" fill="#282421"/>
+  </g>
+  <text x="300" y="206" font-family="Noto Serif, Georgia, serif" font-size="132" font-weight="700" letter-spacing="-5" fill="#282421">Brief</text>
+  <text x="625" y="206" font-family="Noto Serif, Georgia, serif" font-size="132" font-weight="700" letter-spacing="-5" fill="#B47B00">Room</text>
+</svg>

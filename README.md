@@ -1,140 +1,188 @@
-# BriefRoom
+<div align="center">
 
-**From "something like this" to exactly what we agreed to make.**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/briefroom-logo-dark.svg" />
+  <img src="docs/brand/briefroom-logo-light.svg" width="380" alt="BriefRoom" />
+</picture>
 
-BriefRoom turns a customer's vague reference photo into a clear, versioned visual brief that **buyer and seller both approve**. The whole conversation stays attached to it.
-It's built for custom-order businesses (home bakers first, then printed merch and furniture) on the **Nexconn Chat SDK** and **Nexconn Chat UI**.
+**Custom orders, without the guesswork.**
 
-> Nexconn Build Challenge 2026 · Track: **Marketplace & Support** · Platform: **Web**
+One shared space for every reference, revision and final yes, with real-time conversations built on [Nexconn](https://docs.nexconn.ai).
 
----
+[What it does](#what-it-does) · [How it works](#how-it-works) · [Built on Nexconn](#built-on-nexconn) · [Architecture](#architecture) · [Run it locally](#run-it-locally) · [Deploy](#deploy) · [Docs](#documentation)
+
+<sub>Nexconn Build Challenge 2026 · Marketplace & Support · Web</sub>
+
+</div>
+
+![BriefRoom: the order workspace — annotated reference, region discussions, conversation, versions and the final approval](docs/screenshots/hero-desktop-dark.jpg)
 
 ## The problem
 
-Every custom order starts with a screenshot and "make it like this, but…".
+Custom orders — a birthday cake, printed merchandise, a made-to-measure table, a ring — start with “something like this” and a photo. Then come screenshots, voice notes and “the flowers on the left” spread over sixty chat messages. Nobody can point to exactly what was agreed, so mistakes turn into remakes, refunds and arguments.
 
-A home baker in Pune gets a Pinterest photo on WhatsApp: *"like this but pink, and write Happy 25th."* Forty messages, three voice notes and two days later:
-- *Which* pink? *Which* flowers, the big ones or the small ones?
-- Was it 1 kg or 1.5 kg? Eggless? Did ₹1,800 include the topper?
-- The cake is delivered and the customer says *"that's not what I asked for."* The baker scrolls back through 200 messages to prove what was agreed. Nobody can.
+## What it does
 
-The cost is real: remakes, refunds, angry reviews, and hours of clarification per order. Every small seller who makes things to order (cakes, printed merch, furniture, jewellery, tailoring) has this problem.
-**Chat is great for talking. It's terrible at agreeing.**
-
-## The solution
-
-One **brief room** per order. The chat is on the left and the brief is on the right, and the two are wired together.
-
-1. **Reference photos.** The customer uploads "something like this", or long-presses any photo in the chat and taps **Add to brief**.
-2. **Region pins.** Either side drags over a part of the photo and says exactly what they mean:
-   ✅ *Keep exactly* · ✏️ *Change this* · 🎨 *Change colour* (with an exact colour) · 🚫 *Remove* · 🔤 *Add text* · ❓ *Question*.
-   Each pin appears in the chat as a card showing a **crop of that exact region**. Tap it and the brief zooms to the pin.
-3. **Structured spec.** Size, tiers, flavour, eggless, frosting, colour palette, message on cake, delivery date, slot, pickup or delivery, and the quoted price (seller only).
-   Required fields act as a checklist, so nobody can approve an incomplete brief.
-4. **Versions.** "Propose version 3" freezes the photos, pins and spec into a **hashed snapshot** and shows a diff (*"Size: 1 kg → 1.5 kg, Pin #4 added: colour #f4a7c0"*).
-5. **Dual approval.** The order is only **agreed** when **both sides approve the same version**. Any change after that becomes a new version. The agreed brief becomes a printable **work order** with an **agreement fingerprint (SHA-256)**: proof of what was agreed, for both sides.
-
-**The winning moment in the demo:** two people turn an ambiguous Pinterest screenshot into an approved, priced order in about 3 minutes, without losing a word of the discussion.
-
-## Who it's for
+BriefRoom gives every order one private room, shared by the seller and the customer. The customer needs no app or account, just a link. In that room:
 
 | | |
 |---|---|
-| **First users** | Home bakers and small cake studios selling through Instagram and WhatsApp (very common in Indian cities) |
-| **Also fits** | Custom merch printers, furniture makers. The template engine already includes 🎂 cakes, 👕 merch and 🪑 furniture |
-| **Who pays** | The **seller**. BriefRoom cuts clarification time and wrong orders, which are their biggest hidden costs |
-| **How sellers get customers in** | A **shop link** in the Instagram bio. Customers open it, start their own brief, and never need to install an app or sign up |
+| 📍 **Point at the exact region** | Draw a region or drop a pin on any reference photo and say what you mean: keep, change, recolour, remove, add or ask. Coordinates are stored relative to the image, so markers stay in place on every screen size. |
+| 💬 **Talk where the problem is** | Each region has its own thread. The order's conversation runs on Nexconn in real time, with text, photos and live update cards for every change. |
+| 🧭 **See what is still undecided** | The **Clarification Radar** collects missing required details, open questions and critical issues. Critical items block the next version until someone records the answer. An ambiguity check (deterministic rules, plus OpenAI or Grok when configured) suggests questions and quotes the exact words that triggered them. |
+| 🧾 **Know what changed** | The seller freezes the brief into versions. A visual comparison shows what changed between them: specification, annotations, price and delivery. |
+| 🤝 **Agree on one version** | The order becomes **agreed** only when both people approve the same version and the same SHA-256 fingerprint. That approval is checked atomically on the server. A printable A4 work order records the result, and the fingerprint can be verified in the browser. |
 
-## Product tour
+Plus:
+- a seller dashboard with an order pipeline and a Nexconn Chat UI inbox
+- a public shop page
+- structured templates for cakes, merchandise, furniture and jewellery
+- Light, Dark and System themes
+- layouts that work on phones down to 360 px
 
-| Screen | What happens |
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/workspace-chat-dark.jpg" alt="The workspace with the live Nexconn conversation and activity cards" /><br /><sub>The workspace with its live Nexconn conversation</sub></td>
+    <td width="50%"><img src="docs/screenshots/agreed-desktop-dark.jpg" alt="Both people approved version 2: the order is agreed" /><br /><sub>Agreed: both approved the same version and fingerprint</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dashboard-desktop-light.jpg" alt="Seller dashboard with the order pipeline" /><br /><sub>Seller dashboard (light theme)</sub></td>
+    <td width="50%"><img src="docs/screenshots/workorder-light.jpg" alt="Printable A4 work order with the agreement fingerprint" /><br /><sub>Printable work order with a verifiable fingerprint</sub></td>
+  </tr>
+</table>
+
+## How it works
+
+1. **Share a reference.** The seller opens a brief room and sends the customer a private link. The customer uploads “something like this”.
+2. **Point at what you mean.** Both people mark regions on the photo and discuss each one in place.
+3. **Settle open questions.** The Clarification Radar and the structured specification turn vague requests into decisions.
+4. **Both approve one version.** The seller proposes a frozen version. When both people approve that same fingerprint, the order is agreed and the work order is ready.
+
+The seller and customer stay in sync throughout. Every change in the brief is published to the order's Nexconn group as a custom message, so the other person's screen updates without a refresh.
+
+## Built on Nexconn
+
+| Nexconn product | How BriefRoom uses it |
 |---|---|
-| `/` | Landing page: the problem, how it works, call to action |
-| `/start` | Seller creates a shop in 20 seconds (name, city, what they make) |
-| `/seller/:shopId` | **Seller dashboard**: order pipeline (Collecting details → Awaiting approval → Changes requested → Agreed), agreed revenue, new brief with a WhatsApp-ready invite link, shop link, and a **Chat UI inbox** of all customer conversations |
-| `/shop/:shopId` | Public shop page. The customer types their name, picks what they want, and lands in their own brief room |
-| `/o/:orderId` | **Brief room**: Chat UI conversation, plus a visual brief (photos and pins), details (spec), and versions (diffs and approvals) |
-| `/o/:orderId/work-order` | Printable agreed work order with pins, spec table, approval timestamps and the agreement fingerprint |
-| `/stats` | Live public usage numbers (traction proof) |
+| **Chat SDK** (`@nexconn/chat`) | The workspace conversation is BriefRoom's own themed UI. It connects with **server-issued tokens** to one **private group channel per order** (seller and customer only), and supports real-time text, image messages, server history and automatic reconnection. It also renders **custom `BR:*` messages** as activity cards that refresh the brief live. |
+| **Chat UI** (`@nexconn/chatui`) | The seller's inbox across all orders, with ServiceHooks scoped to the seller's own shop and a custom component for the `BR:*` cards. |
+| **Platform Chat API** (server) | Token issuance, idempotent group creation and message sending. Requests are signed on the server, so the App Secret never reaches a browser. A transactional outbox delivers every domain event exactly once per order, in order, with retries. |
 
-## How Nexconn powers it
+The integration was verified live against a real Nexconn app, with two independent users. The checks covered real-time messages both ways, image messages, custom events (in order, exactly once), idempotent retries, history after reload, reconnection after a network drop and the Chat UI inbox. The same messages were confirmed in the Nexconn Console's message tracking. Details: [docs/RELEASE_VERIFICATION.md](docs/RELEASE_VERIFICATION.md).
 
-| Nexconn capability | How BriefRoom uses it | Code |
-|---|---|---|
-| **Server API: issue access token** (`/v4/auth/access-token/issue`) | Seller and customer identities. Signed server-side with primary/backup domain failover; the App Secret never reaches the browser | [server/nexconn.ts](server/nexconn.ts) |
-| **Server API: create group channel** (`/v4/group-channel/create`) | One private group per order (seller as owner plus the customer). `joinPerm: 3`, so nobody else can join | [server/nexconn.ts](server/nexconn.ts) |
-| **Chat UI app shell** (`<nc-chat-ui-app-provider>`) | The order conversation (text, images, files, replies, reactions, editing, read state) in the brief room, and the seller's **inbox** with the built-in channel list | [src/components/ChatUIPanel.tsx](src/components/ChatUIPanel.tsx) |
-| **Chat UI ServiceHooks** | `reqUserProfiles`, `reqGroupProfiles`, `reqGroupMembers` backed by our API, so conversations read "🎂 Priya · Aditi's 25th birthday cake" | [src/lib/nexconn.ts](src/lib/nexconn.ts) |
-| **Chat UI custom messages + Web Components** | 6 custom card bubbles: `BR:Start`, `BR:Ref`, `BR:Pin` (renders a crop of the pinned region), `BR:Spec` (diff), `BR:Version` (price, changes, hash, *Review* button), `BR:Decision` (approved / changes / **agreed** / reopened) | [src/lib/cards.ts](src/lib/cards.ts) |
-| **Chat UI message menu + i18n** | A custom **"Add to brief"** item on image messages turns any photo in the chat into a reference (`cloneMessageMenu`, `setMessageMenu`, `registerLanguagePack`, `MESSAGE_MENU_ITEM_CLICK`) | [src/lib/nexconn.ts](src/lib/nexconn.ts) |
-| **Chat UI feature switches & events** | Reactions, message editing and message state switched on; `CHANNEL_SELECTED` links the inbox to the brief room | [src/lib/nexconn.ts](src/lib/nexconn.ts) |
-| **Chat SDK** `NCEngine` + `MessageHandler` | Connect with a server-issued token. Incoming `BR:*` messages in the order group trigger a live refresh of the brief on the other side | [src/pages/Room.tsx](src/pages/Room.tsx) |
-| **Chat SDK** `SendMessageParams` via `app.sendMessage` | Every brief action posts a card into the conversation, so the chat *is* the audit trail | [src/pages/Room.tsx](src/pages/Room.tsx) |
+<details>
+<summary>Domain events → Nexconn custom messages</summary>
+
+| Domain event | Custom message |
+|---|---|
+| ORDER_CREATED | `BR:OrderCreated` |
+| REFERENCE_ADDED | `BR:ReferenceAdded` |
+| ANNOTATION_CREATED | `BR:AnnotationCreated` |
+| ANNOTATION_COMMENTED | `BR:AnnotationComment` |
+| ANNOTATION_UPDATED / _RESOLUTION_REQUESTED / _RESOLVED / _REOPENED / _DELETED | `BR:AnnotationUpdated` |
+| CLARIFICATION_RAISED | `BR:ClarificationRaised` |
+| CLARIFICATION_RESOLVED | `BR:ClarificationResolved` |
+| SPECIFICATION_UPDATED | `BR:SpecUpdated` |
+| VERSION_PROPOSED | `BR:VersionProposed` |
+| VERSION_APPROVED / VERSION_REJECTED | `BR:VersionDecision` |
+| ORDER_AGREED | `BR:OrderAgreed` |
+| REFERENCE_REMOVED, CLARIFICATION_COMMENTED/_REOPENED, ORDER_REOPENED/_COMPLETED | `BR:OrderUpdated` |
+
+</details>
 
 ## Architecture
 
 ```
- Customer (phone browser)                         Seller (laptop / phone)
- ┌──────────────────────────────┐                ┌──────────────────────────────────┐
- │ Chat UI conversation  │ Brief │                │ Dashboard · Chat UI inbox · Brief │
- └──────────┬───────────────────┘                └───────────────┬──────────────────┘
-            │  text · photos · BR:Pin / BR:Version / BR:Decision cards │
-            ▼                                                          ▼
-   ┌──────────────── Nexconn group channel  o<orderId>  (seller + customer) ───────────────┐
-   │ real-time delivery · history · media · reactions · read state · custom messages        │
-   └─────────────────────────────────────────────────────────────────────────────────────────┘
-            ▲  token issue, group create (signed Server API)
- ┌──────────┴────────────────────────────────────────────────────────────────────────────┐
- │ BriefRoom API (Express): shops, orders, uploads, brief engine                          │
- │   draft → propose (frozen snapshot + SHA-256) → approve / request changes → agreed      │
- └─────────────────────────────────────────────────────────────────────────────────────────┘
+Browser (React 19 SPA · Tailwind v4 design tokens · Light / Dark / System)
+ ├─ Workspace: canvas · annotations · Clarification Radar · specification · versions · approvals
+ │    └─ Conversation on the Nexconn Chat SDK (BR:* activity cards)
+ ├─ Seller dashboard: pipeline · activity · Nexconn Chat UI inbox
+ └─ REST /api/* (capability keys in the x-key header)
+                    │
+Express API ────────┤ every change = ONE Postgres transaction:
+                    │   lock the order → change → recompute status → append domain event (= outbox)
+                    ├─ Outbox ──► Nexconn Platform Chat API (group per order, BR:* messages, retries, ordering)
+                    ├─ Images ──► Neon Object Storage (private bucket, presigned reads)
+                    └─ AI ──► deterministic rules + OpenAI / Grok (optional, evidence-grounded)
+Neon Postgres (Drizzle schema + versioned migrations; triggers keep versions and approvals immutable)
 ```
 
-**Key decisions**
-- **Nexconn carries the conversation; the server owns the agreement.** The brief (photos, pins, spec, versions, approvals) is authoritative on the server, so approvals can't be forged from a client. Each action also posts a typed card through Nexconn, which notifies the other side and makes the chat a complete, readable audit trail.
-- **One group channel per order, not one direct channel per pair.** A repeat customer's three orders stay three separate rooms, each with its own history in the seller's inbox.
-- **Chat UI for the conversation, custom Web Components for the cards.** We get a production-grade chat (media, replies, reactions, editing) and spend our time on what's new: the brief.
-- **Approval binds to a hash, not to a "latest" pointer.** You approve version 3 by its fingerprint. Any later edit creates version 4 and needs fresh approval from both sides.
-- **No accounts.** Sellers get a private key on their device. Customers get a private link. That removes the biggest drop-off for small sellers and their customers.
+- **The backend owns the agreement; Nexconn carries the communication.** Chat messages are signals and display hints. Clients re-fetch authoritative state, and “verified” badges on chat cards are checked against the API.
+- **Approvals bind to order + version + SHA-256 snapshot hash.** The final approval is serialised by a row lock, and the order becomes agreed in that same transaction.
+- **Versions are immutable in the database.** Later changes become a new version that needs both approvals again.
+- **No fake chat.** Without Nexconn credentials the app says so (“Live sync off”) instead of simulating anything.
 
-**Build boundary (deliberate):** no AI image generation and no checkout. BriefRoom does one thing: turn ambiguity into agreement.
+## Tech stack
 
-**Known limitations**
-- Device-bound keys (no login yet). A seller who clears their browser needs their dashboard link again. Phone OTP login is next on the roadmap.
-- A JSON-file store and local uploads fit a single instance with a persistent disk. Swap [server/store.ts](server/store.ts) for Postgres plus object storage to scale.
-- Minor edits (resolving a pin) sync through a 15 s refresh. Significant actions sync instantly through Nexconn cards.
+| Layer | Choice |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, React Router, Tailwind CSS 4, Radix UI, Motion, React Hook Form + Zod |
+| Backend | Node.js 22+, Express 5, Zod |
+| Data | Neon Postgres (node-postgres, Drizzle ORM + migrations) · Neon Object Storage (S3 API) |
+| Real time | Nexconn Chat SDK, Chat UI and Platform Chat API |
+| AI (optional) | OpenAI or Grok (xAI) with JSON-schema output, plus deterministic rules |
+| Quality | `node:test` unit + integration tests on real migrations, Playwright end-to-end tests, 80 WCAG contrast checks |
 
-## Run locally
+## Run it locally
 
-Requirements: Node 20+ and a free Nexconn account (Free Chat Plan: 10,000 MAU, no card).
+Requirements: Node.js 22 or newer.
 
-1. Create an app at [console.nexconn.ai](https://console.nexconn.ai/agile/register) in the **Singapore** data center. Copy the **App Key** and **App Secret** from the App Key page.
-2. Set up and run:
-   ```bash
-   cp .env.example .env     # paste NEXCONN_APP_KEY and NEXCONN_APP_SECRET
-   npm install
-   npm run dev              # web :5173 · api :8787
-   npm test                 # brief engine tests
-   ```
-3. Open http://localhost:5173, then **Create your free shop** and **Create brief room**. Open the customer link in a second browser profile, or on your phone over the same Wi-Fi (Vite listens on your LAN IP).
+```bash
+git clone https://github.com/arjitkulkarni/BriefRoom.git
+cd BriefRoom
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 and choose **Create your first brief**. Open the customer link in a private window, or on a phone on the same Wi-Fi.
+
+With no configuration at all, BriefRoom runs on an embedded database and local file storage. It uses rules-only ambiguity checks and shows “Live sync off” for chat. To enable everything, copy [`.env.example`](.env.example) to `.env.local` and add:
+
+- **Neon** Postgres and Object Storage (`neon init` / `neon env pull` write these for you), then run `npm run db:migrate`
+- a **Nexconn** App Key and App Secret, plus `NEXCONN_REGION` for your app's data centre
+- optionally `OPENAI_API_KEY` and/or `XAI_API_KEY`
+
+Every setting is explained in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+
+## Testing
+
+| Command | What it covers |
+|---|---|
+| `npm test` | Unit and integration tests on real migrations through the HTTP API. They cover approval rules, idempotency, concurrent approvals, database immutability, access control, signed image URLs, and outbox ordering and retries, all against a fake Nexconn API. |
+| `npm run test:e2e` | Two browsers, the seller on desktop and the customer on a phone, from an empty shop to an agreed order and work order. Also covers theme persistence and the absence of overflow or console errors from 360 to 1440 px in both themes. |
+| `npm run test:live` | Opt-in, real Nexconn: token issuance, idempotent group creation, outbox retry and ordering. |
+| `E2E_ENV_FILE=.env.local npm run test:e2e` | The end-to-end suite plus nine live Nexconn checks, against the services configured in that file. |
+| `npm run check:contrast` | 80 WCAG contrast checks across both themes. |
 
 ## Deploy
 
-One Node service. With Render, use [render.yaml](render.yaml): build `npm install && npm run build`, start `npm start`, with a persistent disk at `/var/data` (`DATA_DIR`). Set `PUBLIC_URL` to your live URL so share links point at it.
+[`render.yaml`](render.yaml) is a Render Blueprint for a single stateless web service. All state lives in Neon, so no persistent disk is needed.
 
-## Roadmap
-- Phone OTP login and multi-staff shops
-- Side-by-side visual comparison of versions
-- Advance payment link after agreement (UPI)
-- Seller templates: saved designs, price lists and add-ons
-- Optional AI: draft the spec from the conversation (suggestions only, the humans still agree)
+- **Build:** `npm ci --include=dev && npm run build`
+- **Before each release:** `npm run db:migrate`
+- **Start:** `npm start`
+- **Health check:** `/api/health`. Add `?deep=1` to also check the database, storage, Nexconn and the AI providers.
 
-## Project layout
-```
-server/   Express API · Nexconn Server API client · brief engine · JSON store
-shared/   Types, Nexconn custom message contracts, product templates, diff
-src/      React app · Nexconn Chat SDK + Chat UI bootstrap · card Web Components · pages
-tests/    Brief engine tests (node:test)
-```
+Any Node.js host works with the same commands and [environment variables](docs/CONFIGURATION.md).
 
-MIT License
+## Documentation
+
+- [Configuration](docs/CONFIGURATION.md): environment, database, storage, Nexconn and AI
+- [Design system](design.md) and its [research](docs/DESIGN_RESEARCH.md)
+- [Motion design](docs/MOTION_DESIGN.md), [motion concepts](docs/MOTION_CONCEPTS.md) and [research](docs/MOTION_RESEARCH.md) · before/after: [docs/motion-previews/](docs/motion-previews/)
+- [Implementation audit](docs/IMPLEMENTATION_AUDIT.md) and [release verification](docs/RELEASE_VERIFICATION.md)
+- [Screenshots](docs/screenshots/)
+
+## Limitations
+
+- **No accounts.** Access is by private links (the seller's dashboard link and the customer's order link).
+- **Chat UI has no theming API,** so the seller inbox stays light in dark mode. The workspace conversation is BriefRoom's own themed UI.
+- **The ambiguity check is advisory.** The rules use English keyword patterns. AI suggestions are kept only when they quote the brief or chat verbatim.
+- **Browser console noise.** The Nexconn Web SDK uploads its own diagnostics to a log collector that currently rejects the SDK's request (CORS), so browsers show a console error. Chat is unaffected.
+- **The fingerprint is not a legal contract.** It proves *which* version both people approved; it is not an e-signature.
+
+## Credits and license
+
+Product photos are from [Unsplash](https://unsplash.com) (see [public/images/CREDITS.md](public/images/CREDITS.md)). Real-time messaging is by [Nexconn](https://docs.nexconn.ai); database and storage are by [Neon](https://neon.com).
+
+Released under the MIT License.
