@@ -29,9 +29,11 @@ async function visit(page: Page, path: string, problems: string[]) {
 
 test('theme: explicit choice persists and is applied before first paint; System follows the OS', async ({ page, browser }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Change theme/ }).click();
-  await page.getByRole('menuitemradio', { name: 'Dark' }).click();
+  const toggle = page.getByRole('switch', { name: 'Dark theme' });
+  await expect(toggle).toHaveAttribute('aria-checked', 'false');
+  await toggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(toggle).toHaveAttribute('aria-checked', 'true');
   // Reload and read the attribute at DOMContentLoaded — set by the inline script, before React runs.
   await page.reload({ waitUntil: 'domcontentloaded' });
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
