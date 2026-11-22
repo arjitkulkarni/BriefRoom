@@ -5,6 +5,7 @@
 import type { AppConfig } from './config.ts';
 import type { DbHandle } from './db/client.ts';
 import { createCommands } from './domain/commands.ts';
+import { createDemoService } from './domain/demo.ts';
 import { createBriefService } from './domain/service.ts';
 import { createAssetSigner } from './domain/util.ts';
 import { createNexconnClient, type NexconnServerApi } from './nexconn/client.ts';
@@ -22,5 +23,9 @@ export function createContext(config: AppConfig, dbh: DbHandle, overrides: { nex
   const channels = createChannelManager(dbh.db, nexconn, core.tokenCache);
   const outbox = createOutbox(dbh.db, nexconn, channels);
   if (overrides.autoDispatch !== false) holder.kick = outbox.kick;
-  return { config, dbh, core, commands, channels, outbox, nexconn, storage, startedAt: Date.now() };
+  // Ready-made live demos (seeding one takes many round trips). Filled only after `demo.start()`.
+  const defaultPool = config.env === 'production' ? 2 : config.env === 'development' ? 1 : 0;
+  const poolSize = Math.max(0, Math.min(5, Number(process.env.DEMO_POOL_SIZE ?? defaultPool) || 0));
+  const demo = createDemoService({ db: dbh.db, core, commands, nexconn, channels }, { poolSize });
+  return { config, dbh, core, commands, channels, outbox, nexconn, storage, demo, startedAt: Date.now() };
 }
