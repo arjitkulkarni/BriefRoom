@@ -146,7 +146,7 @@ export function ApprovalCard({ order, version, busy, onApprove, onRequestChanges
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Approve version {version.number}?</DialogTitle>
-            <DialogDescription>You are approving this exact frozen version — images, annotations, specification, price and delivery. The order is agreed only when both of you approve the same fingerprint.</DialogDescription>
+            <DialogDescription>You are saying yes to exactly this: the photo, marks, details, price and delivery. The order is confirmed once you both approve the same version.</DialogDescription>
           </DialogHeader>
           <div className="rounded-md bg-surface-secondary p-3">
             <FingerprintLine hash={version.snapshotHash} full />
@@ -208,9 +208,9 @@ export function ProposeDialog({ order, open, onOpenChange, busy, onPropose, onBl
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Propose version {next}</DialogTitle>
+          <DialogTitle>Send version {next} for approval</DialogTitle>
           <DialogDescription>
-            This freezes the current images, annotations, specification, price and decisions into version {next} with a SHA-256 fingerprint. Nobody can edit a frozen version — later changes become version {next + 1}.
+            This saves a locked copy of the photo, marks, details and price as version {next}. You both check it and press Approve. If anything changes later, it becomes version {next + 1}.
           </DialogDescription>
         </DialogHeader>
         {blocked ? (
