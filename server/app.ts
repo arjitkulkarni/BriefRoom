@@ -5,13 +5,14 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray, notLike } from 'drizzle-orm';
 import { TEMPLATES } from '../shared/templates.ts';
 import type { PublicConfig, Role } from '../shared/types.ts';
 import type { AppConfig } from './config.ts';
 import type { DbHandle } from './db/client.ts';
 import { annotations, briefVersions, domainEvents, orders, participants, referenceImages, shops } from './db/schema.ts';
 import type { Commands } from './domain/commands.ts';
+import { DEMO_USER_PREFIX, type DemoService } from './domain/demo.ts';
 import type { CoreService, OrderAccess } from './domain/service.ts';
 import { HttpError, route } from './http/errors.ts';
 import { NexconnError } from './nexconn/client.ts';
@@ -25,6 +26,7 @@ export interface AppDeps {
   commands: Commands;
   channels: ReturnType<typeof createChannelManager>;
   outbox: ReturnType<typeof createOutbox>;
+  demo: DemoService;
   startedAt: number;
 }
 
@@ -32,14 +34,15 @@ const key = (req: Request) => req.get('x-key') ?? undefined;
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
 export function createApp(deps: AppDeps) {
-  const { config, dbh, core, commands, channels, outbox } = deps;
+  const { config, dbh, core, commands, channels, outbox, demo } = deps;
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use((_req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('X-Frame-Options', 'DENY');
+    // SAMEORIGIN (not DENY): the /demo page shows the seller and the customer side by side in two frames.
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     next();
   });
   app.use('/api', express.json({ limit: '256kb' }));
@@ -123,6 +126,24 @@ export function createApp(deps: AppDeps) {
       }
       const r = await core.createOrder(shopId, { customerName: str(req.body?.customerName), template: str(req.body?.template), title: str(req.body?.title), creationKey: req.get('idempotency-key') ?? undefined }, createdBy);
       res.status(r.replayed ? 200 : 201).json(r);
+    }),
+  );
+
+  /* ------------------------------------------------------------ live demo */
+
+  // A real shop + orders, pre-filled, for visitors who want to try both sides at once (from a warm pool).
+  // Light per-IP limit: each demo creates rows, an image object and a Nexconn group.
+  const demoHits = new Map<string, number[]>();
+  app.post(
+    '/api/demo',
+    route(async (req, res) => {
+      const ip = req.ip ?? 'unknown';
+      const now = Date.now();
+      const recent = (demoHits.get(ip) ?? []).filter((t) => now - t < 3_600_000);
+      if (recent.length >= 15) throw new HttpError(429, 'Too many demos from this network in the last hour. Reuse the one you have open, or try again later.');
+      demoHits.set(ip, [...recent, now]);
+      if (demoHits.size > 5000) demoHits.clear();
+      res.status(201).json(await demo.take());
     }),
   );
 
@@ -359,14 +380,18 @@ export function createApp(deps: AppDeps) {
   app.get(
     '/api/stats',
     route(async (_req, res) => {
+      // Real usage only: shops created by the one-click demo are left out.
+      const notDemoShop = notLike(shops.sellerUserId, `${DEMO_USER_PREFIX}%`);
+      const realShops = core.db.select({ id: shops.id }).from(shops).where(notDemoShop);
+      const realOrders = core.db.select({ id: orders.id }).from(orders).where(inArray(orders.shopId, realShops));
       const [[s], [o], [agreed], [v], [ann], [refs], [sent]] = await Promise.all([
-        core.db.select({ n: count() }).from(shops),
-        core.db.select({ n: count() }).from(orders),
-        core.db.select({ n: count() }).from(orders).where(inArray(orders.status, ['agreed', 'completed'])),
-        core.db.select({ n: count() }).from(briefVersions),
-        core.db.select({ n: count() }).from(annotations),
-        core.db.select({ n: count() }).from(referenceImages),
-        core.db.select({ n: count() }).from(domainEvents).where(eq(domainEvents.nexconnStatus, 'sent')),
+        core.db.select({ n: count() }).from(shops).where(notDemoShop),
+        core.db.select({ n: count() }).from(orders).where(inArray(orders.shopId, realShops)),
+        core.db.select({ n: count() }).from(orders).where(and(inArray(orders.shopId, realShops), inArray(orders.status, ['agreed', 'completed']))),
+        core.db.select({ n: count() }).from(briefVersions).where(inArray(briefVersions.orderId, realOrders)),
+        core.db.select({ n: count() }).from(annotations).where(inArray(annotations.orderId, realOrders)),
+        core.db.select({ n: count() }).from(referenceImages).where(inArray(referenceImages.orderId, realOrders)),
+        core.db.select({ n: count() }).from(domainEvents).where(and(eq(domainEvents.nexconnStatus, 'sent'), inArray(domainEvents.orderId, realOrders))),
       ]);
       res.json({ shops: s.n, orders: o.n, agreed: agreed.n, versions: v.n, annotations: ann.n, references: refs.n, nexconnEventsDelivered: sent.n });
     }),
