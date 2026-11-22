@@ -311,6 +311,29 @@ describe('Nexconn outbox (fake Nexconn server API)', () => {
     }
   });
 
+  test('a busy order cannot hold back another order: delivery is fair across orders and in order within each', async () => {
+    const m = await createTestApp({ autoDispatch: false });
+    try {
+      const shop = await m.call('POST', '/api/shops', { body: { name: 'Studio', ownerName: 'Neha', category: 'cake' } });
+      const open = async (customerName: string) =>
+        (await m.call('POST', `/api/shops/${shop.body.shop.id}/orders`, { key: shop.body.sellerKey, body: { customerName } })).body as { orderId: string; customerKey: string };
+      const busy = await open('Busy');
+      for (let i = 0; i < 60; i++) await m.call('PATCH', `/api/orders/${busy.orderId}/spec`, { key: busy.customerKey, body: { spec: { message: `Draft ${i}` } } });
+      const quiet = await open('Quiet'); // created after 61 events of the busy order (more than a whole batch)
+
+      await m.ctx.outbox.runOnce();
+      const sends = m.nexconn.calls.filter((c) => c.op === 'send').map((c) => String(c.args.channelId));
+      const busySends = sends.map((ch, i) => (ch === `o${busy.orderId}` ? i : -1)).filter((i) => i >= 0);
+      assert.equal(busySends.length, 61, 'everything is delivered in the end');
+      assert.ok(sends.indexOf(`o${quiet.orderId}`) < busySends[5], 'the quiet order is served in the first round, not after the whole backlog');
+      const rows = await m.dbh.db.select().from(domainEvents).where(eq(domainEvents.orderId, busy.orderId)).orderBy(domainEvents.seq);
+      const sentOrder = m.nexconn.calls.filter((c) => c.op === 'send' && c.args.channelId === `o${busy.orderId}`).map((c) => JSON.parse(String(c.args.content)).eventId);
+      assert.deepEqual(sentOrder, rows.map((r) => r.id), 'one order’s events stay in sequence');
+    } finally {
+      await m.close();
+    }
+  });
+
   test('without Nexconn credentials, events are recorded honestly as skipped and the brief still works', async () => {
     const off = await createTestApp({ nexconnEnabled: false });
     try {
@@ -346,5 +369,66 @@ describe('suggestions (rules provider)', () => {
     r = await t.call('PATCH', `/api/orders/${o.orderId}/suggestions/${other.id}`, { key: o.sellerKey, body: { action: 'dismiss' } });
     r = await t.call('POST', `/api/orders/${o.orderId}/analysis`, { key: o.sellerKey, body: { messages: [{ id: 'msg-1', text: 'Slightly lighter pink please' }] } });
     assert.ok(!r.body.order.suggestions.some((s: any) => s.id === other.id), 'dismissed suggestions do not come back');
+  });
+});
+
+describe('one-click live demo', () => {
+  test('seeds the Priya & Neha story through real commands, leaves only the re-quote, and stays out of /api/stats', async () => {
+    const before = (await t.call('GET', '/api/stats')).body;
+    const d = await t.call('POST', '/api/demo', { body: {} });
+    assert.equal(d.status, 201, JSON.stringify(d.body));
+    const { shopId, orderId, sellerKey, customerKey } = d.body;
+    await t.ctx.demo.idle(); // dashboard orders + chat lines are seeded in the background
+
+    const asCustomer = (await t.call('GET', `/api/orders/${orderId}`, { key: customerKey })).body.order;
+    const asSeller = (await t.call('GET', `/api/orders/${orderId}`, { key: sellerKey })).body.order;
+    assert.equal(asCustomer.role, 'customer');
+    assert.equal(asSeller.role, 'seller');
+    assert.equal(asSeller.title, 'Aditi’s 25th birthday cake');
+    assert.equal(asSeller.status, 'changes_requested');
+    assert.equal(asSeller.references.length, 1);
+    assert.deepEqual(
+      asSeller.annotations.map((a: any) => [a.number, a.kind, a.status, a.comments.length]),
+      [
+        [1, 'change', 'discussion', 2],
+        [2, 'keep', 'resolved', 2],
+      ],
+    );
+    assert.deepEqual(asSeller.clarifications.map((c: any) => c.status), ['resolved']);
+    assert.deepEqual(asSeller.versions.map((v: any) => [v.number, v.status]), [[1, 'changes_requested']]);
+    assert.deepEqual(asSeller.blockers.map((b: any) => b.id), ['price'], 'only the seller price is left open');
+
+    // The seller dashboard looks like a working shop: one order in each state.
+    const shop = await t.call('GET', `/api/shops/${shopId}/orders`, { key: sellerKey });
+    assert.equal(shop.status, 200, JSON.stringify(shop.body));
+    const statuses = (shop.body.orders as any[]).map((o) => o.status).sort();
+    assert.deepEqual(statuses, ['agreed', 'awaiting_clarification', 'changes_requested', 'completed']);
+
+    // The chat lines follow the order's activity, sent as the two real participants.
+    const sends = t.nexconn.calls.filter((c) => c.op === 'send' && c.args.channelId === asSeller.channel.channelId).map((c) => c.args as { fromUserId: string; messageType: string; content: string });
+    const kinds = sends.map((s) => (s.messageType === 'RC:TxtMsg' ? 'text' : 'card'));
+    const texts = sends.filter((s) => s.messageType === 'RC:TxtMsg');
+    assert.equal(texts.length, 3);
+    assert.equal(kinds.slice(-3).join(), 'text,text,text', 'chat lines come after the activity cards');
+    const ids = Object.fromEntries(asSeller.participants.map((p: any) => [p.role, p.nexconnUserId]));
+    assert.deepEqual(texts.map((s) => s.fromUserId), [ids.customer, ids.seller, ids.customer]);
+    assert.match(JSON.parse(texts[0].content).content, /2 kg/);
+
+    // Demo shops and their orders are not usage.
+    assert.deepEqual((await t.call('GET', '/api/stats')).body, before);
+
+    // The guided path from the demo page: re-quote → propose v2 (diff against v1) → both approve.
+    let r = await t.call('PATCH', `/api/orders/${orderId}/spec`, { key: sellerKey, body: { spec: { price: 2400 } } });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.deepEqual(r.body.order.blockers, []);
+    r = await t.call('POST', `/api/orders/${orderId}/versions`, { key: sellerKey, body: { note: 'Two kilos, ivory sugar roses.' } });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const v = latestVersion(r.body.order);
+    assert.equal(v.number, 2);
+    assert.ok(v.diff.summary.some((l: string) => /1\.5 kg.*2 kg/.test(l)), JSON.stringify(v.diff.summary));
+    assert.ok(v.diff.summary.some((l: string) => /1,850.*2,400/.test(l)), JSON.stringify(v.diff.summary));
+    assert.equal((await decide({ orderId }, customerKey, v, 'approved')).status, 200);
+    r = await decide({ orderId }, sellerKey, v, 'approved');
+    assert.equal(r.body.order.status, 'agreed');
   });
 });
