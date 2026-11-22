@@ -1,10 +1,10 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft, ChevronLeft, ChevronRight, ClipboardList, FileText, GitCompareArrows, ImagePlus, Images, Link2, MessageSquare, MousePointer2, MoreHorizontal, Radar, Square, Trash2, Crosshair, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock3, ChevronLeft, ChevronRight, ClipboardList, FileText, GitCompareArrows, ImagePlus, Images, Link2, MessageSquare, MousePointer2, MoreHorizontal, Radar, Square, Trash2, Crosshair, Send } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { templateFor } from '@shared/templates';
-import { otherRole, roleLabel, type Blocker, type OrderView, type Role } from '@shared/types';
+import { ORDER_STATUS_META, otherRole, roleLabel, type Blocker, type OrderView, type Role } from '@shared/types';
 import { ConnectionPill, EmptyState, ErrorState, FullPageMessage, PageLoader, StatusBadge } from '@/components/feedback/states';
 import { Logo, ThemeToggle } from '@/components/layout/brand';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { useOrder } from '@/hooks/use-order';
 import { copyWithToast } from '@/lib/clipboard';
 import { api, getConfig, shareBase } from '@/lib/api';
 import { compressImage } from '@/lib/image';
-import { consumeUrlKey, customerKey, saveCustomerKey, sellerKey } from '@/lib/keys';
+import { consumeUrlKey, customerKey, inFrame, saveCustomerKey, sellerKey, setTabKey, tabKey } from '@/lib/keys';
 import { cn, whatsappLink } from '@/lib/utils';
 import { connect, initEngine, getSnapshot, NexconnDisabled } from '@/services/nexconn/client';
 import { useChannel } from '@/services/nexconn/use-channel';
@@ -35,11 +35,15 @@ export default function WorkspacePage() {
   const [key, setKey] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     (async () => {
+      // URL key → this tab's key → this device's customer key → this device's seller key.
+      // The customer key is persisted only once the server confirms the role (see Workspace).
       const fromUrl = consumeUrlKey();
       if (fromUrl) {
-        saveCustomerKey(orderId, fromUrl);
+        setTabKey(orderId, fromUrl); // per frame when framed, so the work order and back links keep the right side
         return setKey(fromUrl);
       }
+      const tab = tabKey(orderId);
+      if (tab) return setKey(tab);
       const c = customerKey(orderId);
       if (c) return setKey(c);
       const meta = await api.meta(orderId).catch(() => null);
@@ -59,10 +63,17 @@ export default function WorkspacePage() {
 /* ===================================================================== workspace */
 
 type Panel = 'notes' | 'chat' | 'radar' | 'details' | 'versions';
+/** "Neha · Sugar & Sprinkles" → "Neha". */
+const firstName = (name: string | undefined) => (name ?? '').split(' · ')[0] || 'the other side';
+
 type MobileTab = 'brief' | 'chat' | 'radar' | 'details' | 'versions';
 
 function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string }) {
   const { order, error, busy, run, scheduleRefresh, refresh } = useOrder(orderId, accessKey);
+  // Remember a customer link on this device only after the server confirms it is the customer's key.
+  useEffect(() => {
+    if (order?.role === 'customer' && !inFrame()) saveCustomerKey(orderId, accessKey);
+  }, [order?.role, orderId, accessKey]);
   const isXl = useMediaQuery('(min-width: 1280px)');
   const isMd = useMediaQuery('(min-width: 768px)');
   const reduce = useReducedMotion();
@@ -118,6 +129,8 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
   const latest = order?.versions.find((v) => v.id === order.latestVersionId) ?? null;
   const agreedVersion = order?.versions.find((v) => v.id === order.agreedVersionId) ?? null;
   const awaitingMe = Boolean(latest && latest.status === 'proposed' && !latest.approvals.some((a) => a.role === order?.role));
+  // I approved the current version; only the other side is left.
+  const awaitingOther = Boolean(latest && latest.status === 'proposed' && latest.approvals.some((a) => a.role === order?.role && a.decision === 'approved'));
   const names = useMemo(() => Object.fromEntries((order?.participants ?? []).map((p) => [p.role, p.name])) as Record<Role, string>, [order]);
 
   useEffect(() => {
@@ -214,7 +227,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
       if (await run('remove', (k) => api.deleteAnnotation(order.id, k, selectedAnn.id), { success: `#${selectedAnn.number} removed` })) setSelected(null);
     },
     raiseClarification: async () => {
-      const r = await run('raise', (k) => api.raiseClarification(order.id, k, { title: `About #${selectedAnn.number}: ${selectedAnn.note || 'please clarify this area'}`.slice(0, 160), critical: true, annotationId: selectedAnn.id }), { success: 'Added to the Clarification Radar' });
+      const r = await run('raise', (k) => api.raiseClarification(order.id, k, { title: `About #${selectedAnn.number}: ${selectedAnn.note || 'please clarify this area'}`.slice(0, 160), critical: true, annotationId: selectedAnn.id }), { success: 'Added to To-do' });
       if (r) openPanel('radar');
     },
   };
@@ -286,14 +299,14 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
       {selectedAnn && threadActions ? (
         <>
           <Button variant="ghost" size="sm" className="-ml-2 justify-self-start" onClick={() => setSelected(null)}>
-            <ArrowLeft /> All annotations
+            <ArrowLeft /> All marks
           </Button>
           <AnnotationThread a={selectedAnn} reference={order.references.find((r) => r.id === selectedAnn.referenceId)} role={role} locked={locked} busy={busy} actions={threadActions} names={names} />
         </>
       ) : ordered.length ? (
         <>
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            {ordered.length} annotation{ordered.length > 1 ? 's' : ''} · {ordered.filter((a) => a.status === 'resolved').length} resolved
+            {ordered.length} mark{ordered.length > 1 ? 's' : ''} · {ordered.filter((a) => a.status === 'resolved').length} sorted out
           </p>
           <div className="grid gap-1">
             {ordered.map((a) => (
@@ -302,8 +315,8 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
           </div>
         </>
       ) : (
-        <EmptyState icon={Crosshair} title="No annotations yet">
-          {liveRefs.length ? 'Choose the area tool and drag over the image to say exactly what to keep, change, add or remove.' : 'Add a reference image first.'}
+        <EmptyState icon={Crosshair} title="Nothing marked yet">
+          {liveRefs.length ? 'Pick “Draw a box”, then drag on the photo to show what to keep, change, add or remove.' : 'Add a reference image first.'}
         </EmptyState>
       )}
     </div>
@@ -316,7 +329,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
       ) : latest?.status === 'proposed' ? (
         <ApprovalCard order={order} version={latest} busy={busy} onApprove={async () => void (await decide('approved'))} onRequestChanges={(r) => decide('changes_requested', r)} onCompare={() => setCompareTarget(latest.id)} />
       ) : latest?.status === 'changes_requested' ? (
-        <ErrorState title={`Changes requested on version ${latest.number}`} action={!locked && <Button size="sm" onClick={() => setProposeOpen(true)}>Propose version {latest.number + 1}</Button>}>
+        <ErrorState title={`Changes requested on version ${latest.number}`} action={!locked && <Button size="sm" onClick={() => setProposeOpen(true)}>Send version {latest.number + 1} for approval</Button>}>
           “{latest.approvals.find((a) => a.decision === 'changes_requested')?.reason}”
         </ErrorState>
       ) : null}
@@ -336,8 +349,8 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
           </section>
         </>
       ) : (
-        <EmptyState icon={FileText} title="No versions yet" action={!locked && <Button onClick={() => setProposeOpen(true)}>Propose version 1</Button>}>
-          When the images, annotations and details look right, freeze them into version 1. Both of you then approve the same version.
+        <EmptyState icon={FileText} title="Nothing to approve yet" action={!locked && <Button onClick={() => setProposeOpen(true)}>Send for approval</Button>}>
+          When the photo, marks and details look right, send them for approval. Once you both press Approve, the order is confirmed.
         </EmptyState>
       )}
     </div>
@@ -372,11 +385,11 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
   const panels: Record<Panel, React.ReactNode> = { notes: notesPanel, chat: chatPanel, radar: radarPanel, details: detailsPanel, versions: versionsPanel };
   const openRadarCount = order.clarifications.filter((c) => c.status !== 'resolved').length + order.blockers.filter((b) => b.kind === 'required_field').length;
   const tabMeta: { id: Panel; label: string; icon: typeof MessageSquare; badge?: number }[] = [
-    ...(!isXl ? [{ id: 'notes' as Panel, label: 'Notes', icon: Crosshair, badge: ordered.filter((a) => a.status !== 'resolved').length }] : []),
+    ...(!isXl ? [{ id: 'notes' as Panel, label: 'Marks', icon: Crosshair, badge: ordered.filter((a) => a.status !== 'resolved').length }] : []),
     { id: 'chat', label: 'Chat', icon: MessageSquare },
-    { id: 'radar', label: 'Radar', icon: Radar, badge: openRadarCount },
+    { id: 'radar', label: 'To-do', icon: Radar, badge: openRadarCount },
     { id: 'details', label: 'Details', icon: ClipboardList },
-    { id: 'versions', label: 'Versions', icon: FileText, badge: awaitingMe ? 1 : 0 },
+    { id: 'versions', label: 'Approve', icon: FileText, badge: awaitingMe ? 1 : 0 },
   ];
 
   // ------------------------------------------------------------- canvas column
@@ -387,12 +400,12 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
           <div className="inline-flex rounded-lg glass-panel p-1 shadow-xs" role="radiogroup" aria-label="Canvas tool">
             {(
               [
-                ['select', MousePointer2, 'Select', 'V'],
-                ['rect', Square, 'Mark area', 'R'],
-                ['point', Crosshair, 'Drop pin', 'P'],
+                ['select', MousePointer2, 'Look', 'V', 'Look around and open marks'],
+                ['rect', Square, 'Draw a box', 'R', 'Drag on the photo to draw a box'],
+                ['point', Crosshair, 'Point', 'P', 'Tap one spot on the photo'],
               ] as const
-            ).map(([id, Icon, label, kbd]) => (
-              <Tooltip key={id} content={`${label} (${kbd})`}>
+            ).map(([id, Icon, label, kbd, help]) => (
+              <Tooltip key={id} content={`${help} (${kbd})`}>
                 <button role="radio" aria-checked={tool === id} onClick={() => setTool(id)} className={cn('inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-semibold text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', tool === id && 'bg-primary text-primary-foreground')}>
                   <Icon className="size-4" aria-hidden />
                   <span className={cn(id === 'select' && 'max-sm:sr-only')}>{label}</span>
@@ -403,13 +416,13 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
         )}
         {ordered.length > 0 && (
           <div className="ml-auto inline-flex items-center gap-1 rounded-lg glass-panel p-1 shadow-xs">
-            <Button variant="ghost" size="icon-sm" onClick={() => goTo(-1)} aria-label="Previous annotation">
+            <Button variant="ghost" size="icon-sm" onClick={() => goTo(-1)} aria-label="Previous mark">
               <ChevronLeft />
             </Button>
-            <span className="min-w-14 text-center text-xs font-semibold tabular-nums text-muted-foreground" aria-live="polite">
-              {selectedAnn ? `#${selectedAnn.number}` : '—'} / {ordered.length}
+            <span className="min-w-20 text-center text-xs font-semibold tabular-nums text-muted-foreground" aria-live="polite">
+              {selectedAnn ? `Mark ${ordered.findIndex((a) => a.id === selectedAnn.id) + 1} of ${ordered.length}` : `${ordered.length} mark${ordered.length > 1 ? 's' : ''}`}
             </span>
-            <Button variant="ghost" size="icon-sm" onClick={() => goTo(1)} aria-label="Next annotation">
+            <Button variant="ghost" size="icon-sm" onClick={() => goTo(1)} aria-label="Next mark">
               <ChevronRight />
             </Button>
           </div>
@@ -438,9 +451,14 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
             Upload a photo of what you have in mind — then mark exactly what to keep, change, add or remove.
           </EmptyState>
         )}
+        {ref && !locked && !pending && !selected && tool !== 'select' && (
+          <p className="pointer-events-none absolute left-1/2 top-3 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/75 px-3 py-1.5 text-[13px] font-semibold text-white shadow-lg">
+            {tool === 'rect' ? '👆 Drag on the photo to draw a box around what you mean' : '👆 Tap the spot you want to talk about'}
+          </p>
+        )}
         <AnimatePresence>
           {pending && ref && isMd && (
-            <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="absolute inset-x-3 bottom-3 z-40 mx-auto max-w-md rounded-xl glass-panel-elevated p-4 shadow-xl">
+            <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="absolute inset-x-3 bottom-3 z-40 mx-auto max-h-[calc(100%-1.5rem)] max-w-lg overflow-y-auto overscroll-contain rounded-xl glass-panel-elevated p-4">
               <AnnotationComposer region={pending} imageUrl={ref.url} busy={busy === 'annotate'} onSave={saveAnnotation} onCancel={() => setPending(null)} />
             </motion.div>
           )}
@@ -492,12 +510,31 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
     </Button>
   ) : awaitingMe ? (
     <Button size="sm" variant="success" onClick={() => openPanel('versions')}>
-      Review v{latest!.number}
+      Review & approve
+    </Button>
+  ) : awaitingOther ? (
+    <Button size="sm" variant="outline" onClick={() => openPanel('versions')}>
+      <Clock3 /> Waiting for {firstName(names[otherRole(role)])}
     </Button>
   ) : (
-    <Button size="sm" onClick={() => setProposeOpen(true)}>
-      <Send /> Propose v{(latest?.number ?? 0) + 1}
-    </Button>
+    <Tooltip content="Lock in the photo, notes and price so you can both approve it">
+      {/* Quieter for a customer who is waiting on the shop's changes, so the screen points to one thing to do. */}
+      <Button size="sm" variant={role === 'customer' && order.status === 'changes_requested' ? 'outline' : 'primary'} onClick={() => setProposeOpen(true)}>
+        <Send /> Send for approval
+      </Button>
+    </Tooltip>
+  );
+
+  const next = ORDER_STATUS_META[order.status].nextAction[role];
+  const nextStep = (
+    <div className="flex items-center gap-2 border-b border-primary/25 bg-primary-soft px-3 py-2 text-sm md:px-4" role="status">
+      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+        <ArrowRight className="size-3.5" aria-hidden />
+      </span>
+      <span className="min-w-0 text-foreground">
+        <span className="font-bold">Your next step:</span> {awaitingMe ? `Check version ${latest!.number} and approve it` : awaitingOther ? `You approved version ${latest!.number}. Waiting for ${firstName(names[otherRole(role)])} to approve it too` : next}
+      </span>
+    </div>
   );
 
   const header = (
@@ -558,15 +595,16 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
   // ------------------------------------------------------------- layouts
   if (!isMd) {
     const mobileTabs: { id: MobileTab; label: string; icon: typeof MessageSquare; badge?: number }[] = [
-      { id: 'brief', label: 'Brief', icon: Images },
+      { id: 'brief', label: 'Photo', icon: Images },
       { id: 'chat', label: 'Chat', icon: MessageSquare },
-      { id: 'radar', label: 'Radar', icon: Radar, badge: openRadarCount },
+      { id: 'radar', label: 'To-do', icon: Radar, badge: openRadarCount },
       { id: 'details', label: 'Details', icon: ClipboardList },
-      { id: 'versions', label: 'Versions', icon: FileText, badge: awaitingMe ? 1 : 0 },
+      { id: 'versions', label: 'Approve', icon: FileText, badge: awaitingMe ? 1 : 0 },
     ];
     return (
       <div className="app-shell flex h-dvh flex-col">
         {header}
+        {nextStep}
         <div className="flex items-center gap-2 overflow-x-auto border-b border-divider bg-surface px-3 py-1.5">
           <StatusBadge status={order.status} />
           {latest && <Badge tone="outline">v{latest.number}</Badge>}
@@ -602,7 +640,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
         </nav>
         <Dialog open={Boolean(pending && ref)} onOpenChange={(o) => !o && setPending(null)}>
           {pending && ref && (
-            <SheetContent side="bottom" title="New annotation" description="Describe exactly what should happen in this area.">
+            <SheetContent side="bottom" title="New annotation" description="Say what you want in the part you picked.">
               <div className="p-4">
                 <AnnotationComposer region={pending} imageUrl={ref.url} busy={busy === 'annotate'} onSave={saveAnnotation} onCancel={() => setPending(null)} />
               </div>
@@ -626,6 +664,7 @@ function Workspace({ orderId, accessKey }: { orderId: string; accessKey: string 
   return (
     <div className="app-shell flex h-dvh flex-col">
       {header}
+      {nextStep}
       <div className={cn('grid min-h-0 flex-1', isXl ? 'grid-cols-[300px_minmax(0,1fr)_400px]' : 'grid-cols-[minmax(0,1fr)_minmax(320px,380px)]')}>
         {isXl && (
           <aside className="min-h-0 overflow-y-auto border-r border-border bg-surface" aria-label="Annotations">
