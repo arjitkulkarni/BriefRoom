@@ -215,7 +215,7 @@ export function createBriefService(deps: Deps) {
 
   /* ================================================================== shops */
 
-  async function createShop(input: { name: string; ownerName: string; category: string; city: string }) {
+  async function createShop(input: { name: string; ownerName: string; category: string; city: string }, opts: { demo?: boolean } = {}) {
     const id = rid(4);
     const sellerKey = secretKey();
     const [shop] = await db
@@ -226,7 +226,8 @@ export function createBriefService(deps: Deps) {
         ownerName: clampText(input.ownerName, 40) || 'Owner',
         category: TEMPLATES[input.category] ? input.category : 'cake',
         city: clampText(input.city, 40),
-        sellerUserId: `s${id}${rid(3)}`,
+        // Demo shops get their own prefix so /api/stats can leave them out of usage numbers.
+        sellerUserId: `${opts.demo ? 'demo' : 's'}${id}${rid(3)}`,
         sellerKeyHash: hashKey(sellerKey),
       })
       .returning();
