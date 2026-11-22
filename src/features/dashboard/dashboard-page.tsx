@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Copy, ExternalLink, Inbox, KeyRound, LayoutGrid, Link2, MessageSquare, Plus, Search, Store } from 'lucide-react';
+import { Activity, ArrowRight, Copy, ExternalLink, Inbox, KeyRound, LayoutGrid, Link2, LogOut, MessageSquare, Plus, Search, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EASE } from '@/components/motion/kit';
@@ -10,11 +10,11 @@ import { EmptyState, ErrorState, FullPageMessage, PageLoader, StatusBadge } from
 import { Logo, ThemeToggle } from '@/components/layout/brand';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/form';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/overlay';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/overlay';
 import { Skeleton } from '@/components/ui/primitives';
 import { copyWithToast } from '@/lib/clipboard';
 import { api, getConfig, shareBase, type ShopActivity } from '@/lib/api';
-import { consumeUrlKey, saveSellerKey, sellerKey } from '@/lib/keys';
+import { consumeUrlKey, forgetSellerKey, saveSellerKey, sellerKey, setTabKey } from '@/lib/keys';
 import { ago, cn, money, shortDate, whatsappLink } from '@/lib/utils';
 import { ModeSwitchRequired, onMessages } from '@/services/nexconn/client';
 import { getInboxApp, initInbox } from '@/services/nexconn/chatui';
@@ -48,6 +48,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
   const [query, setQuery] = useState('');
   const [view, setView] = useState<View>('orders');
   const [newOpen, setNewOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [inboxState, setInboxState] = useState<'idle' | 'loading' | 'ready' | 'disabled' | 'reload' | 'error'>('idle');
   const [inboxError, setInboxError] = useState<string | null>(null);
   const inboxHost = useRef<HTMLDivElement>(null);
@@ -170,6 +171,9 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
         <Button variant="ghost" className="justify-start" onClick={copyDashboardLink}>
           <KeyRound /> Copy dashboard link
         </Button>
+        <Button variant="subtle" className="justify-start" onClick={() => setSignOutOpen(true)}>
+          <LogOut /> Sign out
+        </Button>
         <div className="flex items-center justify-between px-3 pt-2 text-xs text-muted-foreground">
           Theme
           <ThemeToggle />
@@ -215,6 +219,9 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
           </Button>
           <Button variant="ghost" size="icon-sm" onClick={copyDashboardLink} aria-label="Copy private dashboard link">
             <KeyRound />
+          </Button>
+          <Button variant="ghost" size="icon-sm" onClick={() => setSignOutOpen(true)} aria-label="Sign out">
+            <LogOut />
           </Button>
         </div>
 
@@ -274,7 +281,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
                 <ul className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
                   {visible.map((o, i) => (
                     <motion.li key={o.id} layout="position" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: Math.min(i, 8) * 0.045, ease: EASE.settle, layout: { duration: 0.35, ease: EASE.glide } }}>
-                      <OrderCard o={o} onOpen={() => nav(`/o/${o.id}`)} />
+                      <OrderCard o={o} onOpen={() => (setTabKey(o.id, accessKey), nav(`/o/${o.id}`))} />
                     </motion.li>
                   ))}
                 </ul>
@@ -292,7 +299,7 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
                   {activity.slice(0, 14).map((e, i) => (
                     <motion.li key={e.id} className="relative" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: Math.min(i, 10) * 0.03, ease: EASE.settle }}>
                       <span className="absolute -left-[21px] top-1.5 size-2.5 rounded-full border-2 border-background bg-border-strong" aria-hidden />
-                      <Link to={`/o/${e.orderId}`} className="block rounded-md text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      <Link to={`/o/${e.orderId}`} onClick={() => setTabKey(e.orderId, accessKey)} className="block rounded-md text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         <span className="text-foreground">{e.summary}</span>
                       </Link>
                       <p className="text-xs text-muted-foreground">
@@ -329,6 +336,29 @@ function Dashboard({ shopId, accessKey }: { shopId: string; accessKey: string })
       </div>
 
       <NewBriefDialog open={newOpen} onOpenChange={setNewOpen} shop={shop} accessKey={accessKey} onCreated={() => void load()} />
+      <Dialog open={signOutOpen} onOpenChange={setSignOutOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign out of {shop.name}?</DialogTitle>
+            <DialogDescription>This removes the shop’s private key from this device. To get back in you’ll need your private dashboard link — copy it first if you haven’t saved it.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={copyDashboardLink}>
+              <KeyRound /> Copy dashboard link
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                forgetSellerKey(shop.id);
+                // Full reload so the live Nexconn session is torn down too.
+                window.location.assign('/');
+              }}
+            >
+              <LogOut /> Sign out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -426,7 +456,7 @@ function NewBriefDialog({ open, onOpenChange, shop, accessKey, onCreated }: { op
                   <MessageSquare /> WhatsApp
                 </a>
               </Button>
-              <Button onClick={() => nav(`/o/${created.id}`)}>
+              <Button onClick={() => (setTabKey(created.id, accessKey), nav(`/o/${created.id}`))}>
                 Open <ArrowRight />
               </Button>
             </div>
