@@ -18,11 +18,11 @@ export const ORDER_STATUSES = ['collecting', 'awaiting_clarification', 'awaiting
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const ORDER_STATUS_META: Record<OrderStatus, { label: string; tone: 'neutral' | 'warning' | 'info' | 'danger' | 'success' | 'muted'; nextAction: { seller: string; customer: string } }> = {
-  collecting: { label: 'Collecting details', tone: 'neutral', nextAction: { seller: 'Complete the brief and propose a version', customer: 'Add references and details' } },
-  awaiting_clarification: { label: 'Awaiting clarification', tone: 'warning', nextAction: { seller: 'Resolve open questions', customer: 'Answer open questions' } },
-  awaiting_approval: { label: 'Awaiting approval', tone: 'info', nextAction: { seller: 'Review and approve the version', customer: 'Review and approve the version' } },
-  changes_requested: { label: 'Changes requested', tone: 'danger', nextAction: { seller: 'Update the brief and propose a new version', customer: 'Wait for the updated version' } },
-  agreed: { label: 'Agreed', tone: 'success', nextAction: { seller: 'Make it, then mark completed', customer: 'Nothing — the order is agreed' } },
+  collecting: { label: 'Collecting details', tone: 'neutral', nextAction: { seller: 'Fill in the price and details, then send it for approval', customer: 'Draw a box on the photo and say what you want there' } },
+  awaiting_clarification: { label: 'Questions open', tone: 'warning', nextAction: { seller: 'Answer the open questions in To-do', customer: 'Answer the open questions in To-do' } },
+  awaiting_approval: { label: 'Waiting for approval', tone: 'info', nextAction: { seller: 'Check the final version and approve it', customer: 'Check the final version and approve it' } },
+  changes_requested: { label: 'Changes asked for', tone: 'danger', nextAction: { seller: 'Make the requested changes, then send it again', customer: 'Wait — the shop is updating it for you' } },
+  agreed: { label: 'Agreed', tone: 'success', nextAction: { seller: 'You both agreed. Make it, then mark it completed', customer: 'All done — you both agreed. Nothing more to do' } },
   completed: { label: 'Completed', tone: 'muted', nextAction: { seller: 'Done', customer: 'Done' } },
 };
 
@@ -39,8 +39,8 @@ export const ANNOTATION_KIND_META: Record<AnnotationKind, { label: string; short
   colour: { label: 'Change colour', short: 'Colour', tone: 'change', icon: 'palette', prompt: 'Which colour should this be?' },
   remove: { label: 'Remove', short: 'Remove', tone: 'remove', icon: 'eraser', prompt: 'What should be removed?' },
   add: { label: 'Add something', short: 'Add', tone: 'add', icon: 'plus', prompt: 'What should be added here?' },
-  question: { label: 'Ask a question', short: 'Question', tone: 'question', icon: 'circle-help', prompt: 'What would you like to ask?' },
-  custom: { label: 'Custom instruction', short: 'Instruction', tone: 'change', icon: 'message-square-text', prompt: 'Describe the instruction' },
+  question: { label: 'Ask a question', short: 'Ask', tone: 'question', icon: 'circle-help', prompt: 'What would you like to ask?' },
+  custom: { label: 'Something else', short: 'Other', tone: 'change', icon: 'message-square-text', prompt: 'What do you want here?' },
 };
 
 export const ANNOTATION_STATUSES = ['open', 'discussion', 'resolved'] as const;
