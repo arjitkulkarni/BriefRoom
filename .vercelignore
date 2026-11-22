@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+data/
+dist/
+node_modules/
+test-results/
+playwright-report/
+submission/
+api/_server.mjs
+*_Master_Prompt.md
